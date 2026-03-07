@@ -7,7 +7,7 @@ class Api::V1::ChannelsController < Api::V1::BaseController
   end
 
   def create
-    channel = Channel.new(channel_params.with_defaults(channel_type: Channel::ChannelType::Ticker.serialize))
+    channel = Channel.new(channel_params)
 
     if channel.save
       render json: ChannelResource.new(channel).serialize, status: :created
@@ -19,6 +19,6 @@ class Api::V1::ChannelsController < Api::V1::BaseController
   private
 
   def channel_params
-    params.expect(channel: [:name, :description])
+    params.expect(channel: [:name, :channel_type, :description])
   end
 end

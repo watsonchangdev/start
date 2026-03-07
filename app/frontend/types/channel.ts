@@ -10,5 +10,6 @@ export interface Channel {
 
 export interface CreateChannelParams {
   name: string
+  channel_type: ChannelType
   description?: string
 }

@@ -15,18 +15,18 @@ import {
 import { Loader2 } from "lucide-react";
 import { channelMutations } from "@/queries/channel-queries";
 import { ApiError } from "@/lib/api";
-import type { Channel, CreateChannelParams } from "@/types/channel";
+import type { Channel, ChannelType, CreateChannelParams } from "@/types/channel";
 
 export interface AddChannelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (channel: Channel) => void;
+  channelType: ChannelType;
 }
 
-export function AddChannelDialog({ open, onOpenChange, onCreated }: AddChannelDialogProps) {
+export function AddChannelDialog({ open, onOpenChange, onCreated, channelType }: AddChannelDialogProps) {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const { mutate: createChannel, isPending } = useMutation({
@@ -46,15 +46,13 @@ export function AddChannelDialog({ open, onOpenChange, onCreated }: AddChannelDi
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFieldErrors({});
-    const params: CreateChannelParams = { name: name.trim() };
-    if (description.trim()) params.description = description.trim();
+    const params: CreateChannelParams = { name: name.trim(), channel_type: channelType };
     createChannel(params);
   }
 
   function handleOpenChange(next: boolean) {
     if (!next) {
       setName("");
-      setDescription("");
       setFieldErrors({});
     }
     onOpenChange(next);
@@ -84,24 +82,6 @@ export function AddChannelDialog({ open, onOpenChange, onCreated }: AddChannelDi
             />
             {fieldErrors.name && (
               <p className="text-xs text-destructive">{fieldErrors.name}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="channel-description">
-              Description{" "}
-              <span className="text-muted-foreground font-normal">(optional)</span>
-            </Label>
-            <Input
-              id="channel-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What's this channel about?"
-              disabled={isPending}
-              aria-invalid={!!fieldErrors.description}
-            />
-            {fieldErrors.description && (
-              <p className="text-xs text-destructive">{fieldErrors.description}</p>
             )}
           </div>
 
