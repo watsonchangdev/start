@@ -1,6 +1,7 @@
 class CreateChannels < ActiveRecord::Migration[8.1]
   def change
     create_table :channels do |t|
+      t.string :channel_type
       t.string :name, null: false
       t.text :description
 
