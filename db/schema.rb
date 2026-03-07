@@ -29,6 +29,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_022452) do
     t.bigint "channel_id", null: false
     t.text "content", null: false
     t.datetime "created_at", null: false
+    t.string "message_type", null: false
+    t.jsonb "metadata", default: {}
     t.bigint "sent_by_id", null: false
     t.string "sent_by_type", null: false
     t.datetime "updated_at", null: false
