@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-START v1 is a full-stack financial data platform built with Rails 8 + Inertia.js + React 19. The application tracks market data for stocks (tickers) and options contracts with historical pricing at daily and minute intervals.
+START v1 is a full-stack financial data platform built with Rails 8 + Inertia.js + React 19. The application tracks market data for stocks (tickers) and options contracts.
 
 **Tech Stack:**
 - Backend: Rails 8.1.2 (Ruby 4.0.1) + PostgreSQL 13+
@@ -70,31 +70,6 @@ export default function Show({ ticker }: { ticker: Ticker }) {
 }
 ```
 
-### Authentication
-
-Session-based authentication using signed cookies (httponly, same_site: lax):
-
-- **Authentication concern**: `app/controllers/concerns/authentication.rb` provides `require_authentication`, `Current.session`, `Current.user`
-- **User model**: Uses bcrypt via `has_secure_password`
-- **Session model**: Tracks IP address and user agent
-- **Rate limiting**: 10 login attempts per 3 minutes
-- **Controllers**: All inherit authentication requirement by default; use `allow_unauthenticated_access` to skip
-
-### Database Schema
-
-**Core domain models:**
-
-- `User` - has_many sessions
-- `Session` - belongs_to user, tracks IP/user agent
-- `Ticker` - Stock symbols with metadata (symbol, name, exchange)
-- `OptionContract` - belongs_to ticker (option_type, strike_price, expires_on)
-- `TickerDailyPrice` / `TickerMinutePrice` - OHLCV data for tickers
-- `OptionDailyPrice` / `OptionMinutePrice` - OHLCV data for options
-
-All price models include: `price_open`, `price_high`, `price_low`, `price_close`, `volume`, `vwap`, `num_trades`
-
-Unique indexes on `(ticker_id, date)` and `(ticker_id, start_at)` prevent duplicate price records.
-
 ### Frontend Structure
 
 ```
@@ -115,21 +90,9 @@ app/frontend/
 - Icons: Lucide React + Phosphor Icons
 - Tailwind CSS v4 with CSS variables for theming
 
-### Dual Asset Pipeline
-
-1. **Vite** (modern frontend): Handles React/TypeScript in `app/frontend/`
-2. **Propshaft** (Rails default): Handles other assets in `app/assets/`
-
-Entry points defined in `app/frontend/entrypoints/`. Vite dev server runs on port 3036 with hot module reloading.
-
 ## Conventions
 
 - **Always use UUID, not integer ID, as the record identifier** in API responses, frontend types, query keys, and URLs. Never expose or use `id` for records that have a `uuid`.
-
-## Key Configuration Files
-
-- `components.json` - shadcn/ui setup (style: base-lyra, iconLibrary: lucide)
-- `.rubocop.yml` - Inherits Rails Omakase style guide
-- `vite.json` - Vite dev server port 3036, sourceCodeDir: app/frontend
-- `config/initializers/inertia_rails.rb` - Inertia configuration and shared data
-- `Procfile.dev` - Foreman process file for concurrent dev servers
+- **ALWAYS** optimize for best practices and high quality and readable code.
+- Use OpenAPI standards for API endpoints.
+- Use Sorbet for type signatures.
