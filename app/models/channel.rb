@@ -3,6 +3,9 @@ class Channel < ApplicationRecord
   has_many :bot_participants, class_name: "ChannelBot"
   has_many :messages, class_name: "ChannelMessage"
 
-  private
+  normalizes :name, with: ->(n) { n.strip }
+
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :description, length: { maximum: 500 }, allow_blank: true
 
 end

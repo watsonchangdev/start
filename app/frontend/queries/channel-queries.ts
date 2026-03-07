@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { keys } from "@/lib/query-keys"
-import type { Channel } from "@/types/channel"
+import type { Channel, CreateChannelParams } from "@/types/channel"
 
 export const channelQueries = {
   list: () =>
@@ -10,9 +10,16 @@ export const channelQueries = {
       queryFn: () => api.get<Channel[]>("/channels"),
     }),
 
-  detail: (id: number) =>
+  detail: (uuid: string) =>
     queryOptions({
-      queryKey: keys.channels.detail(id),
-      queryFn: () => api.get<Channel>(`/channels/${id}`),
+      queryKey: keys.channels.detail(uuid),
+      queryFn: () => api.get<Channel>(`/channels/${uuid}`),
     }),
+}
+
+export const channelMutations = {
+  create: {
+    mutationFn: (params: CreateChannelParams) =>
+      api.post<Channel>("/channels", { channel: params }),
+  },
 }

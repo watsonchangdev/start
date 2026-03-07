@@ -1,7 +1,7 @@
 class ChannelMessageResource
   include Alba::Resource
 
-  attributes :uuid, :content, :message_type
+  attributes :uuid, :content
 
   attribute :username do |message|
     sender = message.sent_by

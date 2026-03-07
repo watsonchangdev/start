@@ -4,14 +4,25 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { AlertCircle, Hash, Loader2, Menu, Plus, Send, Settings } from "lucide-react";
-import { channelQueries } from "@/queries/channel-queries";
+import { channelQueries, channelMutations } from "@/queries/channel-queries";
 import { channelMessageMutations, channelMessageQueries } from "@/queries/channel-message-queries";
 import { keys } from "@/lib/query-keys";
-import type { Channel } from "@/types/channel";
+import { ApiError } from "@/lib/api";
+import type { Channel, CreateChannelParams } from "@/types/channel";
 import type { ChannelMessage } from "@/types/channel-message";
 
 // --- Helpers ---
@@ -37,6 +48,7 @@ interface SidebarProps {
   isPending: boolean;
   isError: boolean;
   onSelectChannel: (uuid: string) => void;
+  onAddChannel: () => void;
 }
 
 function ChannelSkeleton() {
@@ -52,7 +64,7 @@ function ChannelSkeleton() {
   );
 }
 
-function Sidebar({ channels, activeChannelUuid, isPending, isError, onSelectChannel }: SidebarProps) {
+function Sidebar({ channels, activeChannelUuid, isPending, isError, onSelectChannel, onAddChannel }: SidebarProps) {
   return (
     <div className="flex flex-col h-full bg-[#1a1d21] text-zinc-300">
       <div className="flex items-center px-4 py-3 border-b border-white/10">
@@ -72,6 +84,7 @@ function Sidebar({ channels, activeChannelUuid, isPending, isError, onSelectChan
                     variant="ghost"
                     size="icon"
                     className="h-5 w-5 text-zinc-500 hover:text-white hover:bg-white/10"
+                    onClick={onAddChannel}
                   />
                 }
               >
@@ -173,6 +186,39 @@ function MessageBubble({ message, isGrouped }: MessageBubbleProps) {
   );
 }
 
+// --- Empty / loading states for main area ---
+
+function ChannelContentSkeleton() {
+  return (
+    <div className="flex flex-col flex-1 min-w-0 animate-pulse">
+      <div className="flex items-center px-4 h-14 border-b shrink-0 gap-2">
+        <div className="h-4 w-4 rounded bg-muted" />
+        <div className="h-3 w-28 rounded bg-muted" />
+      </div>
+      <div className="flex-1 px-4 pt-8 space-y-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex gap-3">
+            <div className="h-9 w-9 rounded-full bg-muted shrink-0" />
+            <div className="space-y-2 flex-1 pt-1">
+              <div className="h-3 w-24 rounded bg-muted" />
+              <div className="h-3 w-2/3 rounded bg-muted" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function NoChannelState() {
+  return (
+    <div className="flex flex-col flex-1 items-center justify-center gap-3 text-muted-foreground">
+      <Hash className="h-10 w-10 opacity-20" />
+      <p className="text-sm">No channels available.</p>
+    </div>
+  );
+}
+
 // --- Messages area ---
 
 function MessagesSkeleton() {
@@ -191,10 +237,119 @@ function MessagesSkeleton() {
   );
 }
 
+// --- Add Channel Dialog ---
+
+interface AddChannelDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: (channel: Channel) => void;
+}
+
+function AddChannelDialog({ open, onOpenChange, onCreated }: AddChannelDialogProps) {
+  const queryClient = useQueryClient();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const { mutate: createChannel, isPending } = useMutation({
+    ...channelMutations.create,
+    onSuccess: (channel) => {
+      queryClient.invalidateQueries({ queryKey: ["channels"] });
+      onCreated(channel);
+      onOpenChange(false);
+    },
+    onError: (err) => {
+      if (err instanceof ApiError && Object.keys(err.errors).length > 0) {
+        setFieldErrors(err.errors);
+      }
+    },
+  });
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setFieldErrors({});
+    const params: CreateChannelParams = { name: name.trim() };
+    if (description.trim()) params.description = description.trim();
+    createChannel(params);
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      setName("");
+      setDescription("");
+      setFieldErrors({});
+    }
+    onOpenChange(next);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogHeader>
+          <DialogTitle>Create a channel</DialogTitle>
+          <DialogDescription>
+            Channels are where conversations happen. Give it a clear, short name.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+          <div className="space-y-1.5">
+            <Label htmlFor="channel-name">Name</Label>
+            <Input
+              id="channel-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. general"
+              autoFocus
+              disabled={isPending}
+              aria-invalid={!!fieldErrors.name}
+            />
+            {fieldErrors.name && (
+              <p className="text-xs text-destructive">{fieldErrors.name}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="channel-description">
+              Description{" "}
+              <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="channel-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What's this channel about?"
+              disabled={isPending}
+              aria-invalid={!!fieldErrors.description}
+            />
+            {fieldErrors.description && (
+              <p className="text-xs text-destructive">{fieldErrors.description}</p>
+            )}
+          </div>
+
+          <DialogFooter className="pt-2">
+            <DialogClose
+              render={
+                <Button type="button" variant="ghost" disabled={isPending} />
+              }
+            >
+              Cancel
+            </DialogClose>
+            <Button type="submit" disabled={!name.trim() || isPending}>
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create channel"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // --- Page ---
 
 export default function Home() {
   const [activeChannelUuid, setActiveChannelUuid] = useState<string | null>(null);
+  const [addChannelOpen, setAddChannelOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -250,6 +405,7 @@ export default function Home() {
     isPending: channelsPending,
     isError: channelsError,
     onSelectChannel: setActiveChannelUuid,
+    onAddChannel: () => setAddChannelOpen(true),
   };
 
   return (
@@ -261,102 +417,113 @@ export default function Home() {
         </aside>
 
         {/* Main area */}
-        <div className="flex flex-col flex-1 min-w-0">
-          {/* Header */}
-          <header className="flex items-center justify-between px-4 h-14 border-b shrink-0 bg-background">
-            <div className="flex items-center gap-2">
-              {/* Mobile sidebar trigger */}
-              <Sheet>
-                <SheetTrigger
-                  render={
-                    <Button variant="ghost" size="icon" className="md:hidden -ml-1" />
-                  }
-                >
-                  <Menu className="h-5 w-5" />
-                </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-60 border-0">
-                  <Sidebar {...sidebarProps} />
-                </SheetContent>
-              </Sheet>
+        {channelsPending ? (
+          <ChannelContentSkeleton />
+        ) : !currentChannel ? (
+          <NoChannelState />
+        ) : (
+          <div className="flex flex-col flex-1 min-w-0">
+            {/* Header */}
+            <header className="flex items-center justify-between px-4 h-14 border-b shrink-0 bg-background">
+              <div className="flex items-center gap-2">
+                {/* Mobile sidebar trigger */}
+                <Sheet>
+                  <SheetTrigger
+                    render={
+                      <Button variant="ghost" size="icon" className="md:hidden -ml-1" />
+                    }
+                  >
+                    <Menu className="h-5 w-5" />
+                  </SheetTrigger>
+                  <SheetContent side="left" className="p-0 w-60 border-0">
+                    <Sidebar {...sidebarProps} />
+                  </SheetContent>
+                </Sheet>
 
-              <div className="flex items-center gap-1.5">
-                <Hash className="h-4 w-4 text-muted-foreground" />
-                <span className="font-semibold text-sm">{currentChannel?.name}</span>
-              </div>
-            </div>
-
-            <div className="relative">
-              <Avatar className="h-8 w-8 cursor-pointer">
-                <AvatarFallback className="text-xs bg-indigo-600 text-white">YO</AvatarFallback>
-              </Avatar>
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background" />
-            </div>
-          </header>
-
-          {/* Messages */}
-          <ScrollArea className="flex-1">
-            <div className="px-4 pb-4">
-              {/* Channel intro */}
-              <div className="pt-8 pb-4 mb-2 border-b">
-                <div className="flex items-center gap-2 mb-1">
-                  <Hash className="h-6 w-6" />
-                  <h2 className="text-xl font-bold">{currentChannel?.name}</h2>
+                <div className="flex items-center gap-1.5">
+                  <Hash className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-semibold text-sm">{currentChannel.name}</span>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  This is the beginning of the <strong>#{currentChannel?.name}</strong> channel.
-                </p>
               </div>
 
-              {messagesPending && <MessagesSkeleton />}
+              <div className="relative">
+                <Avatar className="h-8 w-8 cursor-pointer">
+                  <AvatarFallback className="text-xs bg-indigo-600 text-white">YO</AvatarFallback>
+                </Avatar>
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-background" />
+              </div>
+            </header>
 
-              {messagesError && (
-                <div className="flex items-center gap-2 px-1 py-4 text-red-500 text-sm">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>Failed to load messages.</span>
+            {/* Messages */}
+            <ScrollArea className="flex-1">
+              <div className="px-4 pb-4">
+                {/* Channel intro */}
+                <div className="pt-8 pb-4 mb-2 border-b">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Hash className="h-6 w-6" />
+                    <h2 className="text-xl font-bold">{currentChannel.name}</h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    This is the beginning of the <strong>#{currentChannel.name}</strong> channel.
+                  </p>
                 </div>
-              )}
 
-              {messages.map((msg, i) => {
-                const isGrouped = i > 0 && messages[i - 1].username === msg.username;
-                return <MessageBubble key={msg.uuid} message={msg} isGrouped={isGrouped} />;
-              })}
+                {messagesPending && <MessagesSkeleton />}
 
-              <div ref={bottomRef} />
-            </div>
-          </ScrollArea>
-
-          {/* Message input */}
-          <div className="px-4 pb-4 pt-2 shrink-0 bg-background">
-            <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-1 focus-within:ring-ring transition-shadow">
-              <Input
-                ref={inputRef}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={`Message #${currentChannel?.name}`}
-                className="border-0 shadow-none p-0 focus-visible:ring-0 text-sm h-auto bg-transparent"
-                disabled={sending}
-              />
-              <Button
-                size="icon"
-                variant={draft.trim() ? "default" : "ghost"}
-                className="h-7 w-7 shrink-0 transition-all"
-                onClick={handleSend}
-                disabled={!draft.trim() || sending}
-              >
-                {sending ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Send className="h-3.5 w-3.5" />
+                {messagesError && (
+                  <div className="flex items-center gap-2 px-1 py-4 text-red-500 text-sm">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>Failed to load messages.</span>
+                  </div>
                 )}
-              </Button>
+
+                {messages.map((msg, i) => {
+                  const isGrouped = i > 0 && messages[i - 1].username === msg.username;
+                  return <MessageBubble key={msg.uuid} message={msg} isGrouped={isGrouped} />;
+                })}
+
+                <div ref={bottomRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Message input */}
+            <div className="px-4 pb-4 pt-2 shrink-0 bg-background">
+              <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-1 focus-within:ring-ring transition-shadow">
+                <Input
+                  ref={inputRef}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={`Message #${currentChannel.name}`}
+                  className="border-0 shadow-none p-0 focus-visible:ring-0 text-sm h-auto bg-transparent"
+                  disabled={sending}
+                />
+                <Button
+                  size="icon"
+                  variant={draft.trim() ? "default" : "ghost"}
+                  className="h-7 w-7 shrink-0 transition-all"
+                  onClick={handleSend}
+                  disabled={!draft.trim() || sending}
+                >
+                  {sending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Send className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1.5 px-1">
+                Press <kbd className="px-1 py-0.5 bg-muted rounded text-[11px] font-mono">Enter</kbd> to send
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1.5 px-1">
-              Press <kbd className="px-1 py-0.5 bg-muted rounded text-[11px] font-mono">Enter</kbd> to send
-            </p>
           </div>
-        </div>
+        )}
       </div>
-    </TooltipProvider>
+        <AddChannelDialog
+          open={addChannelOpen}
+          onOpenChange={setAddChannelOpen}
+          onCreated={(channel) => setActiveChannelUuid(channel.uuid)}
+        />
+      </TooltipProvider>
   );
 }

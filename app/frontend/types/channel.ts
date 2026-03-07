@@ -1,7 +1,11 @@
 export interface Channel {
-  id: number
   uuid: string
   name: string
   description: string | null
   created_at: string
+}
+
+export interface CreateChannelParams {
+  name: string
+  description?: string
 }

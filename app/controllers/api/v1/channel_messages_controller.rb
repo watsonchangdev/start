@@ -28,6 +28,6 @@ class Api::V1::ChannelMessagesController < Api::V1::BaseController
   end
 
   def message_params
-    params.expect(channel_message: [ :content, :message_type ])
+    params.expect(channel_message: [ :content ])
   end
 end

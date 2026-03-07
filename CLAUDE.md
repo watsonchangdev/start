@@ -122,6 +122,10 @@ app/frontend/
 
 Entry points defined in `app/frontend/entrypoints/`. Vite dev server runs on port 3036 with hot module reloading.
 
+## Conventions
+
+- **Always use UUID, not integer ID, as the record identifier** in API responses, frontend types, query keys, and URLs. Never expose or use `id` for records that have a `uuid`.
+
 ## Key Configuration Files
 
 - `components.json` - shadcn/ui setup (style: base-lyra, iconLibrary: lucide)
