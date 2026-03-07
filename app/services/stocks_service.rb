@@ -1,5 +1,22 @@
-class StockPricesService
+class StocksService
   class << self
+
+    def create_or_get_by_ticker(symbol)
+      ticker = Ticker.find_by(symbol: symbol.upcase)
+      
+      return ticker if ticker.present?
+
+      ticker_info = client.asset(symbol)
+
+      ticker = Ticker.create!(
+        symbol: symbol,
+        name: ticker_info["name"],
+        primary_exchange: ticker_info["exchange"]
+      )
+
+      ticker
+    end
+
     # Fetches and upserts daily OHLCV bars for a ticker between start_date and end_date.
     # Returns the number of records upserted.
     def get_daily_prices(ticker, start_date, end_date)
@@ -86,6 +103,10 @@ class StockPricesService
     end
 
     private
+
+    def get_ticker_info(symbol)
+
+    end
 
     def client
       @client ||= AlpacaClient.new
