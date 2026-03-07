@@ -10,15 +10,16 @@ class ApplicationController < ActionController::Base
 
   inertia_share do
     {
-      user: set_user
+      user: set_user,
+      flash: flash.to_h
     }
   end
 
   private
 
-  def set_user    
+  def set_user
     @user ||= if authenticated?
-      Current.user
+      { id: Current.user.id, email_address: Current.user.email_address }
     else
       nil
     end

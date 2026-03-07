@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -7,74 +7,12 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertCircle, Bell, Hash, Menu, Plus, Send, Settings } from "lucide-react";
+import { AlertCircle, Bell, Hash, Loader2, Menu, Plus, Send, Settings } from "lucide-react";
 import { channelQueries } from "@/queries/channel-queries";
+import { channelMessageMutations, channelMessageQueries } from "@/queries/channel-message-queries";
+import { keys } from "@/lib/query-keys";
 import type { Channel } from "@/types/channel";
-
-// --- Types ---
-
-interface Message {
-  id: string;
-  author: string;
-  content: string;
-  timestamp: string;
-  isOwn?: boolean;
-}
-
-// --- Mock Data (messages only — channels are live) ---
-
-const MESSAGES: Message[] = [
-  {
-    id: "1",
-    author: "Alice Chen",
-    content: "Good morning everyone! Who's up for a quick sync at 10am?",
-    timestamp: "9:02 AM",
-  },
-  {
-    id: "2",
-    author: "Bob Tanaka",
-    content: "I'm in! What's on the agenda?",
-    timestamp: "9:04 AM",
-  },
-  {
-    id: "3",
-    author: "Alice Chen",
-    content: "Sprint planning and a quick review of last week's retro action items.",
-    timestamp: "9:05 AM",
-  },
-  {
-    id: "4",
-    author: "Carol Smith",
-    content: "Sounds good, I'll join too. I have some updates on the design system to share.",
-    timestamp: "9:07 AM",
-  },
-  {
-    id: "5",
-    author: "You",
-    content: "Perfect, I'll send a calendar invite.",
-    timestamp: "9:08 AM",
-    isOwn: true,
-  },
-  {
-    id: "6",
-    author: "Bob Tanaka",
-    content: "Thanks! Also just pushed the PR for the auth refactor if anyone has bandwidth to review.",
-    timestamp: "9:15 AM",
-  },
-  {
-    id: "7",
-    author: "Carol Smith",
-    content: "I'll take a look after standup.",
-    timestamp: "9:16 AM",
-  },
-  {
-    id: "8",
-    author: "You",
-    content: "Same here, queuing it up now.",
-    timestamp: "9:18 AM",
-    isOwn: true,
-  },
-];
+import type { ChannelMessage } from "@/types/channel-message";
 
 // --- Helpers ---
 
@@ -87,14 +25,18 @@ function initials(name: string) {
     .slice(0, 2);
 }
 
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 // --- Sidebar ---
 
 interface SidebarProps {
   channels: Channel[];
-  activeChannelId: number | null;
+  activeChannelUuid: string | null;
   isPending: boolean;
   isError: boolean;
-  onSelectChannel: (id: number) => void;
+  onSelectChannel: (uuid: string) => void;
 }
 
 function ChannelSkeleton() {
@@ -103,14 +45,14 @@ function ChannelSkeleton() {
       {[40, 64, 52, 48, 72].map((w) => (
         <div key={w} className="flex items-center gap-2 py-1">
           <div className="h-4 w-4 rounded bg-white/10 shrink-0 animate-pulse" />
-          <div className={`h-3 rounded bg-white/10 animate-pulse`} style={{ width: w }} />
+          <div className="h-3 rounded bg-white/10 animate-pulse" style={{ width: w }} />
         </div>
       ))}
     </div>
   );
 }
 
-function Sidebar({ channels, activeChannelId, isPending, isError, onSelectChannel }: SidebarProps) {
+function Sidebar({ channels, activeChannelUuid, isPending, isError, onSelectChannel }: SidebarProps) {
   return (
     <div className="flex flex-col h-full bg-[#1a1d21] text-zinc-300">
       {/* Workspace header */}
@@ -165,11 +107,11 @@ function Sidebar({ channels, activeChannelId, isPending, isError, onSelectChanne
 
           {channels.map((channel) => (
             <button
-              key={channel.id}
-              onClick={() => onSelectChannel(channel.id)}
+              key={channel.uuid}
+              onClick={() => onSelectChannel(channel.uuid)}
               className={cn(
                 "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left",
-                activeChannelId === channel.id
+                activeChannelUuid === channel.uuid
                   ? "bg-white/15 text-white"
                   : "text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-100"
               )}
@@ -215,24 +157,18 @@ function Sidebar({ channels, activeChannelId, isPending, isError, onSelectChanne
 // --- Message Bubble ---
 
 interface MessageBubbleProps {
-  message: Message;
+  message: ChannelMessage;
   isGrouped: boolean;
 }
 
 function MessageBubble({ message, isGrouped }: MessageBubbleProps) {
   return (
     <div className={cn("flex gap-3 px-1", isGrouped ? "mt-0.5" : "mt-4")}>
-      {/* Fixed-width avatar column keeps all messages aligned */}
       <div className="w-9 shrink-0 pt-0.5">
         {!isGrouped && (
           <Avatar className="h-9 w-9">
-            <AvatarFallback
-              className={cn(
-                "text-xs font-medium",
-                message.isOwn ? "bg-indigo-600 text-white" : "bg-zinc-200 text-zinc-700"
-              )}
-            >
-              {initials(message.author)}
+            <AvatarFallback className="text-xs font-medium bg-zinc-200 text-zinc-700">
+              {initials(message.username)}
             </AvatarFallback>
           </Avatar>
         )}
@@ -241,15 +177,10 @@ function MessageBubble({ message, isGrouped }: MessageBubbleProps) {
       <div className="flex-1 min-w-0">
         {!isGrouped && (
           <div className="flex items-baseline gap-2 mb-0.5">
-            <span
-              className={cn(
-                "text-sm font-semibold leading-none",
-                message.isOwn ? "text-indigo-600" : "text-foreground"
-              )}
-            >
-              {message.author}
+            <span className="text-sm font-semibold leading-none text-foreground">
+              {message.username}
             </span>
-            <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+            <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
           </div>
         )}
         <p className="text-sm text-foreground leading-relaxed">{message.content}</p>
@@ -258,22 +189,62 @@ function MessageBubble({ message, isGrouped }: MessageBubbleProps) {
   );
 }
 
+// --- Messages area ---
+
+function MessagesSkeleton() {
+  return (
+    <div className="px-5 space-y-4 pt-4">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="flex gap-3">
+          <div className="h-9 w-9 rounded-full bg-muted animate-pulse shrink-0" />
+          <div className="space-y-2 flex-1">
+            <div className="h-3 w-24 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-3/4 rounded bg-muted animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // --- Page ---
 
 export default function Home() {
-  const [activeChannelId, setActiveChannelId] = useState<number | null>(null);
-  const [message, setMessage] = useState("");
+  const [activeChannelUuid, setActiveChannelUuid] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
-  const { data: channels = [], isPending, isError } = useQuery(channelQueries.list());
+  const { data: channels = [], isPending: channelsPending, isError: channelsError } =
+    useQuery(channelQueries.list());
 
-  // Default to the first channel once loaded; respect explicit selection thereafter
-  const currentChannel =
-    channels.find((c) => c.id === activeChannelId) ?? channels[0];
+  // Default to the first channel; respect explicit selection thereafter
+  const currentChannel = channels.find((c) => c.uuid === activeChannelUuid) ?? channels[0];
+  const channelUuid = currentChannel?.uuid ?? "";
+
+  const {
+    data: messages = [],
+    isPending: messagesPending,
+    isError: messagesError,
+  } = useQuery(channelMessageQueries.list(channelUuid));
+
+  const { mutate: sendMessage, isPending: sending } = useMutation({
+    ...channelMessageMutations.create(channelUuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.channels.messages(channelUuid) });
+    },
+  });
+
+  // Scroll to bottom whenever messages change or channel switches
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, channelUuid]);
 
   function handleSend() {
-    if (!message.trim()) return;
-    setMessage("");
-    // TODO: send message
+    const content = draft.trim();
+    if (!content || sending) return;
+    setDraft("");
+    sendMessage({ content });
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -285,10 +256,10 @@ export default function Home() {
 
   const sidebarProps: SidebarProps = {
     channels,
-    activeChannelId: activeChannelId ?? currentChannel?.id ?? null,
-    isPending,
-    isError,
-    onSelectChannel: setActiveChannelId,
+    activeChannelUuid: activeChannelUuid ?? currentChannel?.uuid ?? null,
+    isPending: channelsPending,
+    isError: channelsError,
+    onSelectChannel: setActiveChannelUuid,
   };
 
   return (
@@ -324,7 +295,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* User avatar top-right */}
             <div className="relative">
               <Avatar className="h-8 w-8 cursor-pointer">
                 <AvatarFallback className="text-xs bg-indigo-600 text-white">YO</AvatarFallback>
@@ -347,10 +317,21 @@ export default function Home() {
                 </p>
               </div>
 
-              {MESSAGES.map((msg, i) => {
-                const isGrouped = i > 0 && MESSAGES[i - 1].author === msg.author;
-                return <MessageBubble key={msg.id} message={msg} isGrouped={isGrouped} />;
+              {messagesPending && <MessagesSkeleton />}
+
+              {messagesError && (
+                <div className="flex items-center gap-2 px-1 py-4 text-red-500 text-sm">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>Failed to load messages.</span>
+                </div>
+              )}
+
+              {messages.map((msg, i) => {
+                const isGrouped = i > 0 && messages[i - 1].username === msg.username;
+                return <MessageBubble key={msg.uuid} message={msg} isGrouped={isGrouped} />;
               })}
+
+              <div ref={bottomRef} />
             </div>
           </ScrollArea>
 
@@ -358,20 +339,25 @@ export default function Home() {
           <div className="px-4 pb-4 pt-2 shrink-0 bg-background">
             <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-1 focus-within:ring-ring transition-shadow">
               <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={`Message #${currentChannel?.name}`}
                 className="border-0 shadow-none p-0 focus-visible:ring-0 text-sm h-auto bg-transparent"
+                disabled={sending}
               />
               <Button
                 size="icon"
-                variant={message.trim() ? "default" : "ghost"}
+                variant={draft.trim() ? "default" : "ghost"}
                 className="h-7 w-7 shrink-0 transition-all"
                 onClick={handleSend}
-                disabled={!message.trim()}
+                disabled={!draft.trim() || sending}
               >
-                <Send className="h-3.5 w-3.5" />
+                {sending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 px-1">
