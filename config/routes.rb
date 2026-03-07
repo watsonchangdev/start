@@ -7,6 +7,12 @@ Rails.application.routes.draw do
     get "(*path)", to: redirect { |params, req| "#{req.protocol}localhost:#{req.port}/#{params[:path]}" }
   end
 
+  namespace :api do
+    namespace :v1 do
+      resources :channels, only: [:index]
+    end
+  end
+
   root 'welcome#home'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

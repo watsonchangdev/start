@@ -1,6 +1,9 @@
 import { createInertiaApp, type ResolvedComponent } from '@inertiajs/react'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { queryClient } from '@/lib/query-client'
 
 void createInertiaApp({
   // Set default page title
@@ -34,7 +37,10 @@ void createInertiaApp({
   setup({ el, App, props }) {
     createRoot(el).render(
       <StrictMode>
-        <App {...props} />
+        <QueryClientProvider client={queryClient}>
+          <App {...props} />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
       </StrictMode>
     )
   },

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -6,15 +7,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Bell, Hash, Menu, Plus, Send, Settings } from "lucide-react";
+import { AlertCircle, Bell, Hash, Menu, Plus, Send, Settings } from "lucide-react";
+import { channelQueries } from "@/queries/channel-queries";
+import type { Channel } from "@/types/channel";
 
 // --- Types ---
-
-interface Channel {
-  id: string;
-  name: string;
-  unread?: number;
-}
 
 interface Message {
   id: string;
@@ -24,15 +21,7 @@ interface Message {
   isOwn?: boolean;
 }
 
-// --- Mock Data ---
-
-const CHANNELS: Channel[] = [
-  { id: "1", name: "general", unread: 3 },
-  { id: "2", name: "random" },
-  { id: "3", name: "engineering", unread: 12 },
-  { id: "4", name: "design" },
-  { id: "5", name: "announcements" },
-];
+// --- Mock Data (messages only — channels are live) ---
 
 const MESSAGES: Message[] = [
   {
@@ -102,11 +91,26 @@ function initials(name: string) {
 
 interface SidebarProps {
   channels: Channel[];
-  activeChannel: string;
-  onSelectChannel: (id: string) => void;
+  activeChannelId: number | null;
+  isPending: boolean;
+  isError: boolean;
+  onSelectChannel: (id: number) => void;
 }
 
-function Sidebar({ channels, activeChannel, onSelectChannel }: SidebarProps) {
+function ChannelSkeleton() {
+  return (
+    <div className="px-4 space-y-1.5 py-1">
+      {[40, 64, 52, 48, 72].map((w) => (
+        <div key={w} className="flex items-center gap-2 py-1">
+          <div className="h-4 w-4 rounded bg-white/10 shrink-0 animate-pulse" />
+          <div className={`h-3 rounded bg-white/10 animate-pulse`} style={{ width: w }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Sidebar({ channels, activeChannelId, isPending, isError, onSelectChannel }: SidebarProps) {
   return (
     <div className="flex flex-col h-full bg-[#1a1d21] text-zinc-300">
       {/* Workspace header */}
@@ -129,7 +133,6 @@ function Sidebar({ channels, activeChannel, onSelectChannel }: SidebarProps) {
       </div>
 
       <ScrollArea className="flex-1 py-3">
-        {/* Channels */}
         <div className="px-2 mb-1">
           <div className="flex items-center justify-between px-2 py-1 mb-0.5">
             <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">
@@ -151,28 +154,31 @@ function Sidebar({ channels, activeChannel, onSelectChannel }: SidebarProps) {
             </Tooltip>
           </div>
 
+          {isPending && <ChannelSkeleton />}
+
+          {isError && (
+            <div className="flex items-center gap-2 px-2 py-2 text-red-400 text-xs">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>Failed to load channels</span>
+            </div>
+          )}
+
           {channels.map((channel) => (
             <button
               key={channel.id}
               onClick={() => onSelectChannel(channel.id)}
               className={cn(
                 "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors text-left",
-                activeChannel === channel.id
+                activeChannelId === channel.id
                   ? "bg-white/15 text-white"
                   : "text-zinc-400 hover:bg-white/[0.08] hover:text-zinc-100"
               )}
             >
               <Hash className="h-4 w-4 shrink-0 opacity-70" />
               <span className="flex-1 truncate">{channel.name}</span>
-              {channel.unread && (
-                <span className="text-[11px] bg-red-500 text-white rounded-full px-1.5 py-px leading-none min-w-[18px] text-center font-medium">
-                  {channel.unread}
-                </span>
-              )}
             </button>
           ))}
         </div>
-
       </ScrollArea>
 
       {/* User profile */}
@@ -255,10 +261,14 @@ function MessageBubble({ message, isGrouped }: MessageBubbleProps) {
 // --- Page ---
 
 export default function Home() {
-  const [activeChannel, setActiveChannel] = useState("1");
+  const [activeChannelId, setActiveChannelId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
 
-  const currentChannel = CHANNELS.find((c) => c.id === activeChannel);
+  const { data: channels = [], isPending, isError } = useQuery(channelQueries.list());
+
+  // Default to the first channel once loaded; respect explicit selection thereafter
+  const currentChannel =
+    channels.find((c) => c.id === activeChannelId) ?? channels[0];
 
   function handleSend() {
     if (!message.trim()) return;
@@ -274,9 +284,11 @@ export default function Home() {
   }
 
   const sidebarProps: SidebarProps = {
-    channels: CHANNELS,
-    activeChannel,
-    onSelectChannel: setActiveChannel,
+    channels,
+    activeChannelId: activeChannelId ?? currentChannel?.id ?? null,
+    isPending,
+    isError,
+    onSelectChannel: setActiveChannelId,
   };
 
   return (
