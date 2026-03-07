@@ -10,6 +10,7 @@ class SyncService
     end
 
     def stream_news
+      # TODO: get realtime stream of news per symbols params
     end
   end
 end

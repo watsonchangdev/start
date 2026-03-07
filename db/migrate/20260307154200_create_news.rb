@@ -11,6 +11,7 @@ class CreateNews < ActiveRecord::Migration[8.1]
       t.string :article_url
 
       t.datetime :published_at, null: false
+      t.string :api_reference_key
       t.jsonb :metadata, default: {}
 
       t.uuid :uuid, default: "gen_random_uuid()", null: false
