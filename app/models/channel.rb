@@ -16,9 +16,14 @@ class Channel < ApplicationRecord
 
   normalizes :name, with: ->(n) { n.strip }
 
+  before_validation :normalize_channel_name
+
   validates :name, presence: true, uniqueness: { case_sensitive: false }
   validates :description, length: { maximum: 500 }, allow_blank: true
 
   private
 
+  def normalize_channel_name
+    self.name = name.upcase if channel_type == ChannelType::Ticker.serialize
+  end
 end
