@@ -9,18 +9,7 @@
 #     priority: 2
 #     schedule: at 5am every day
 
-development:
-  sync_news:
-    class: SyncNewsJob
-    queue: default
-    schedule: every minute
-
-  sync_historical:
-    class: SyncHistoricalJob
-    queue: default
-    schedule: every day at 9:15pm  # 1:15pm PST (UTC-8)
-
-production:
+default: &default
   sync_news:
     class: SyncNewsJob
     queue: default
@@ -34,3 +23,12 @@ production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

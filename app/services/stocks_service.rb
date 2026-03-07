@@ -34,7 +34,7 @@ class StocksService
         {
           ticker_id:   ticker.id,
           date:        timestamp.to_date,
-          start_at:    timestamp,
+          start_at:    timestamp.beginning_of_day,
           end_at:      timestamp.end_of_day,
           price_open:  bar["o"],
           price_high:  bar["h"],
@@ -50,11 +50,7 @@ class StocksService
 
       return 0 if rows.empty?
 
-      TickerDailyPrice.upsert_all(
-        rows,
-        unique_by: %i[ticker_id date],
-        update_only: %i[start_at end_at price_open price_high price_low price_close volume vwap num_trades updated_at]
-      )
+      TickerDailyPrice.insert_all(rows, unique_by: %i[ticker_id date])
 
       true
     end
@@ -93,11 +89,7 @@ class StocksService
 
       return 0 if rows.empty?
 
-      TickerMinutePrice.upsert_all(
-        rows,
-        unique_by: %i[ticker_id start_at],
-        update_only: %i[end_at date price_open price_high price_low price_close volume vwap num_trades updated_at]
-      )
+      TickerMinutePrice.insert_all(rows, unique_by: %i[ticker_id start_at])
 
       true
     end
