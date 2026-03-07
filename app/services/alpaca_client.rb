@@ -45,7 +45,7 @@ class AlpacaClient
 
     loop do
       body = data_get("/v2/stocks/#{URI.encode_uri_component(symbol)}/bars", **params, limit: params.fetch(:limit, 1000), page_token:)
-      results.concat(body.fetch("bars", []))
+      results.concat(body.fetch("bars", nil) || [])
 
       page_token = body["next_page_token"]
       break if page_token.nil?

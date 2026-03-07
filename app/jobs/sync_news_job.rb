@@ -5,7 +5,7 @@ class SyncNewsJob < ApplicationJob
     symbols = Ticker.pluck(:symbol)
 
     symbols.each do |symbol|
-      StocksService.get_news(symbol, 24.hours.ago)
+      StocksService.get_news(symbol, 1.hour.ago)
     end
   end
 end
