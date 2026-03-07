@@ -9,7 +9,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :channels, only: [:index] do
+      resources :channels, only: [:index], param: :uuid do
         resources :channel_messages, only: [:index, :create], path: "messages"
       end
     end

@@ -22,7 +22,7 @@ class Api::V1::ChannelMessagesController < Api::V1::BaseController
   private
 
   def set_channel
-    @channel = Channel.find(params[:channel_id])
+    @channel = Channel.find_by!(uuid: params[:channel_uuid])
   rescue ActiveRecord::RecordNotFound
     render_error "Channel not found", status: :not_found
   end

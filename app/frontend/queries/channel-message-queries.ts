@@ -4,18 +4,18 @@ import { keys } from "@/lib/query-keys"
 import type { ChannelMessage, CreateChannelMessageParams } from "@/types/channel-message"
 
 export const channelMessageQueries = {
-  list: (channelId: number) =>
+  list: (channelUuid: string) =>
     queryOptions({
-      queryKey: keys.channels.messages(channelId),
-      queryFn: () => api.get<ChannelMessage[]>(`/channels/${channelId}/messages`),
-      enabled: channelId > 0,
+      queryKey: keys.channels.messages(channelUuid),
+      queryFn: () => api.get<ChannelMessage[]>(`/channels/${channelUuid}/messages`),
+      enabled: !!channelUuid,
     }),
 }
 
 export const channelMessageMutations = {
-  create: (channelId: number) => ({
+  create: (channelUuid: string) => ({
     mutationFn: (params: CreateChannelMessageParams) =>
-      api.post<ChannelMessage>(`/channels/${channelId}/messages`, {
+      api.post<ChannelMessage>(`/channels/${channelUuid}/messages`, {
         channel_message: params,
       }),
   }),
