@@ -11,6 +11,7 @@ class Api::V1::ChannelMessagesController < Api::V1::BaseController
   def create
     message = @channel.messages.build(message_params)
     message.sent_by = current_user
+    message.message_type = ChannelMessage::MessageType::UserMessage.serialize
 
     if message.save
       render json: ChannelMessageResource.new(message).serialize, status: :created
