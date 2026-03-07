@@ -213,6 +213,7 @@ export default function Home() {
   const [activeChannelUuid, setActiveChannelUuid] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: channels = [], isPending: channelsPending, isError: channelsError } =
@@ -240,11 +241,16 @@ export default function Home() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, channelUuid]);
 
+  // Focus input on mount and when switching channels
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [channelUuid]);
+
   function handleSend() {
     const content = draft.trim();
     if (!content || sending) return;
     setDraft("");
-    sendMessage({ content });
+    sendMessage({ content }, { onSettled: () => inputRef.current?.focus() });
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -339,6 +345,7 @@ export default function Home() {
           <div className="px-4 pb-4 pt-2 shrink-0 bg-background">
             <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-1 focus-within:ring-ring transition-shadow">
               <Input
+                ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={handleKeyDown}

@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -25,13 +24,11 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 px-4">
       <div className="mb-8 text-center">
-        <span className="text-sm font-semibold tracking-tight text-foreground">UnderDog Exchange</span>
       </div>
 
       <Card className="w-full max-w-xs rounded-2xl shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-semibold">Welcome back</CardTitle>
-          <CardDescription className="text-sm">Sign in to your account to continue.</CardDescription>
+          <CardTitle className="text-xl font-semibold">Welcome back!</CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -57,12 +54,6 @@ export default function Login() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/passwords/new"
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Forgot password?
-                </Link>
               </div>
               <Input
                 id="password"

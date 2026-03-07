@@ -26,13 +26,12 @@ export default function Register() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 px-4">
       <div className="mb-8 text-center">
-        <span className="text-sm font-semibold tracking-tight text-foreground">UnderDog Exchange</span>
+
       </div>
 
       <Card className="w-full max-w-xs rounded-2xl shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-semibold">Create an account</CardTitle>
-          <CardDescription className="text-sm">Enter your details to get started.</CardDescription>
+          <CardTitle className="text-xl font-semibold">Hello!</CardTitle>
         </CardHeader>
 
         <CardContent>
