@@ -1,0 +1,20 @@
+class CreateNews < ActiveRecord::Migration[8.1]
+  def change
+    create_table :news do |t|
+      t.string :headline
+      t.string :author
+      t.string :source
+      t.text :summary
+
+      t.string :thumb_url
+      t.string :large_url
+      t.string :article_url
+
+      t.datetime :published_at, null: false
+      t.jsonb :metadata
+
+      t.uuid :uuid, default: "gen_random_uuid()", null: false
+      t.timestamps
+    end
+  end
+end

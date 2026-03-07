@@ -10,6 +10,25 @@ class AlpacaClient
     @api_secret = ENV.fetch("ALPACA_API_SECRET")
   end
 
+  # Returns an array of news articles for the given symbol.
+  # Automatically follows pagination via next_page_token.
+  # params: start:, end:, limit:, sort:, include_content:
+  def news(symbol, **params)
+    results = []
+    page_token = nil
+    params = { start: 90.days.ago.iso8601, **params }
+
+    loop do
+      body = data_get("/v1beta1/news", symbols: symbol, **params, limit: params.fetch(:limit, 50), page_token:)
+      results.concat(body.fetch("news", []))
+
+      page_token = body["next_page_token"]
+      break if page_token.nil?
+    end
+
+    results
+  end
+
 
   # Returns basic asset info for a symbol: name, exchange, class, tradable, etc.
   # https://docs.alpaca.markets/reference/getasset

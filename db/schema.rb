@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_022452) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_07_154729) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,6 +59,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_022452) do
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["name"], name: "index_channels_on_name", unique: true
+  end
+
+  create_table "news", force: :cascade do |t|
+    t.string "article_url"
+    t.string "author"
+    t.datetime "created_at", null: false
+    t.string "headline"
+    t.string "large_url"
+    t.jsonb "metadata"
+    t.datetime "published_at", null: false
+    t.string "source"
+    t.text "summary"
+    t.string "thumb_url"
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
   end
 
   create_table "option_contracts", force: :cascade do |t|
@@ -125,6 +140,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_022452) do
     t.string "user_agent"
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "source_id", null: false
+    t.string "source_type", null: false
+    t.bigint "taggable_id", null: false
+    t.string "taggable_type", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["source_type", "source_id", "taggable_type", "taggable_id"], name: "index_tags_uniqueness", unique: true
+    t.index ["source_type", "source_id"], name: "index_tags_on_source"
+    t.index ["taggable_type", "taggable_id"], name: "index_tags_on_taggable"
   end
 
   create_table "ticker_daily_prices", force: :cascade do |t|
