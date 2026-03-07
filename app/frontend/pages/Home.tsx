@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertCircle, Bell, Hash, Loader2, Menu, Plus, Send, Settings } from "lucide-react";
+import { AlertCircle, Hash, Loader2, Menu, Plus, Send, Settings } from "lucide-react";
 import { channelQueries } from "@/queries/channel-queries";
 import { channelMessageMutations, channelMessageQueries } from "@/queries/channel-message-queries";
 import { keys } from "@/lib/query-keys";
@@ -55,23 +55,8 @@ function ChannelSkeleton() {
 function Sidebar({ channels, activeChannelUuid, isPending, isError, onSelectChannel }: SidebarProps) {
   return (
     <div className="flex flex-col h-full bg-[#1a1d21] text-zinc-300">
-      {/* Workspace header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+      <div className="flex items-center px-4 py-3 border-b border-white/10">
         <span className="font-semibold text-white text-sm tracking-tight">UnderDog Exchange</span>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-zinc-400 hover:text-white hover:bg-white/10"
-              />
-            }
-          >
-            <Bell className="h-4 w-4" />
-          </TooltipTrigger>
-          <TooltipContent>Notifications</TooltipContent>
-        </Tooltip>
       </div>
 
       <ScrollArea className="flex-1 py-3">
@@ -123,7 +108,6 @@ function Sidebar({ channels, activeChannelUuid, isPending, isError, onSelectChan
         </div>
       </ScrollArea>
 
-      {/* User profile */}
       <div className="border-t border-white/10 p-3 flex items-center gap-2.5">
         <div className="relative shrink-0">
           <Avatar className="h-8 w-8">
