@@ -4,8 +4,12 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+aapl:
+  symbol: AAPL
+  name: Apple Inc.
+  primary_exchange: NASDAQ
+
+tsla:
+  symbol: TSLA
+  name: Tesla Inc.
+  primary_exchange: NASDAQ

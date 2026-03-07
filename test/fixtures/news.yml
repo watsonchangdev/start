@@ -4,8 +4,10 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+apple_earnings:
+  headline: Apple Reports Record Quarter
+  author: Jane Doe
+  source: Reuters
+  summary: Apple reported record quarterly earnings.
+  article_url: https://reuters.com/apple-q1-2026
+  published_at: 2026-03-01 10:00:00

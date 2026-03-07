@@ -127,6 +127,9 @@ class StocksService
       true
     end
 
+    def stream_news(symbols)
+    end
+
     private
 
     def client
