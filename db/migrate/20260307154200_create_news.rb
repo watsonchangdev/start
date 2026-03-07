@@ -17,5 +17,7 @@ class CreateNews < ActiveRecord::Migration[8.1]
       t.uuid :uuid, default: "gen_random_uuid()", null: false
       t.timestamps
     end
+
+    add_index :news, :api_reference_key, unique: true
   end
 end

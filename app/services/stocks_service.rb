@@ -111,14 +111,15 @@ class StocksService
         thumb  = images.find { |i| i["size"] == "thumb" }&.fetch("url", nil)
         large  = images.find { |i| i["size"] == "large" }&.fetch("url", nil)
 
-        news = News.find_or_create_by!(article_url: article["url"]) do |n|
-          n.headline     = article["headline"]
-          n.author       = article["author"]
-          n.source       = article["source"]
-          n.summary      = article["summary"]
-          n.thumb_url    = thumb
-          n.large_url    = large
-          n.published_at = Time.parse(article["created_at"])
+        news = News.find_or_create_by!(api_reference_key: article["id"].to_s) do |n|
+          n.headline         = article["headline"]
+          n.author           = article["author"]
+          n.source           = article["source"]
+          n.summary          = article["summary"]
+          n.thumb_url        = thumb
+          n.large_url        = large
+          n.article_url      = article["url"]
+          n.published_at     = Time.parse(article["created_at"])
         end
 
         news.add_tag(ticker)

@@ -7,5 +7,6 @@
 
 ### local dev
 
-* ./bin/dev
-* to reset solid queue db: (1) rails db:drop:queue (2) rails db:prepare
+* /bin/dev
+* to reset migrations: ```rails db:migrate:reset:primary```
+* to reset solid queue db: (1) ```rails db:drop:queue``` (2) ```rails db:prepare```

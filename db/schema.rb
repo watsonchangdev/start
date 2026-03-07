@@ -75,6 +75,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_154729) do
     t.string "thumb_url"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["api_reference_key"], name: "index_news_on_api_reference_key", unique: true
   end
 
   create_table "option_contracts", force: :cascade do |t|
