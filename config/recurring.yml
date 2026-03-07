@@ -15,8 +15,13 @@ default: &default
     queue: default
     schedule: every minute
 
-  sync_historical:
-    class: SyncHistoricalJob
+  sync_minute_prices:
+    class: SyncMinutePricesJob
+    queue: default
+    schedule: every minute
+
+  sync_historical_prices:
+    class: SyncHistoricalPricesJob
     queue: default
     schedule: every day at 9:15pm  # 1:15pm PST (UTC-8)
 

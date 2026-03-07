@@ -3,6 +3,9 @@ class SyncNewsJob < ApplicationJob
 
   def perform
     symbols = Ticker.pluck(:symbol)
-    SyncService.sync_news(symbols)
+
+    symbols.each do |symbol|
+      StocksService.get_news(symbol, 24.hours.ago)
+    end
   end
 end
