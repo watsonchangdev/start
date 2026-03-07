@@ -1,0 +1,2 @@
+class TickerMinutePrice < ApplicationRecord
+end

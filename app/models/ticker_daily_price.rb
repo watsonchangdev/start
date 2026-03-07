@@ -1,0 +1,2 @@
+class TickerDailyPrice < ApplicationRecord
+end

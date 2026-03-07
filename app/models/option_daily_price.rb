@@ -1,0 +1,2 @@
+class OptionDailyPrice < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class OptionContract < ApplicationRecord
+end
