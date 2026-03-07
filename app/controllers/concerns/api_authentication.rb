@@ -5,6 +5,12 @@ module ApiAuthentication
     before_action :require_api_authentication
   end
 
+  class_methods do
+    def allow_unauthenticated_access(**options)
+      skip_before_action :require_api_authentication, **options
+    end
+  end
+
   private
 
   def require_api_authentication
