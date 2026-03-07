@@ -56,7 +56,7 @@ class StocksService
         update_only: %i[start_at end_at price_open price_high price_low price_close volume vwap num_trades updated_at]
       )
 
-      rows.size
+      true
     end
 
     # Fetches and upserts minute OHLCV bars for a ticker between start_at and end_at.
@@ -99,14 +99,35 @@ class StocksService
         update_only: %i[end_at date price_open price_high price_low price_close volume vwap num_trades updated_at]
       )
 
-      rows.size
+      true
+    end
+
+    def get_news(symbol, start_from)
+      ticker   = create_or_get_by_ticker(symbol)
+      articles = client.news(symbol, start: start_from.iso8601)
+
+      articles.each do |article|
+        images = article.fetch("images", [])
+        thumb  = images.find { |i| i["size"] == "thumb" }&.fetch("url", nil)
+        large  = images.find { |i| i["size"] == "large" }&.fetch("url", nil)
+
+        news = News.find_or_create_by!(article_url: article["url"]) do |n|
+          n.headline     = article["headline"]
+          n.author       = article["author"]
+          n.source       = article["source"]
+          n.summary      = article["summary"]
+          n.thumb_url    = thumb
+          n.large_url    = large
+          n.published_at = Time.parse(article["created_at"])
+        end
+
+        news.add_tag(ticker)
+      end
+
+      true
     end
 
     private
-
-    def get_ticker_info(symbol)
-
-    end
 
     def client
       @client ||= AlpacaClient.new
