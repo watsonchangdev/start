@@ -1,0 +1,94 @@
+class StockPricesService
+  class << self
+    # Fetches and upserts daily OHLCV bars for a ticker between start_date and end_date.
+    # Returns the number of records upserted.
+    def get_daily_prices(ticker, start_date, end_date)
+      bars = client.bars(
+        ticker.symbol,
+        timeframe:  "1Day",
+        start:      start_date.iso8601,
+        end:        end_date.iso8601,
+        adjustment: "raw",
+        feed:       "iex"
+      )
+
+      rows = bars.map do |bar|
+        timestamp = Time.parse(bar["t"])
+        {
+          ticker_id:   ticker.id,
+          date:        timestamp.to_date,
+          start_at:    timestamp,
+          end_at:      timestamp.end_of_day,
+          price_open:  bar["o"],
+          price_high:  bar["h"],
+          price_low:   bar["l"],
+          price_close: bar["c"],
+          volume:      bar["v"],
+          vwap:        bar["vw"],
+          num_trades:  bar["n"],
+          created_at:  Time.current,
+          updated_at:  Time.current
+        }
+      end
+
+      return 0 if rows.empty?
+
+      TickerDailyPrice.upsert_all(
+        rows,
+        unique_by: %i[ticker_id date],
+        update_only: %i[start_at end_at price_open price_high price_low price_close volume vwap num_trades updated_at]
+      )
+
+      rows.size
+    end
+
+    # Fetches and upserts minute OHLCV bars for a ticker between start_at and end_at.
+    # Returns the number of records upserted.
+    def get_minute_prices(ticker, start_at, end_at)
+      bars = client.bars(
+        ticker.symbol,
+        timeframe:  "1Min",
+        start:      start_at.iso8601,
+        end:        end_at.iso8601,
+        limit:      10_000,
+        adjustment: "raw",
+        feed:       "iex"
+      )
+
+      rows = bars.map do |bar|
+        bar_start = Time.parse(bar["t"])
+        {
+          ticker_id:   ticker.id,
+          date:        bar_start.to_date,
+          start_at:    bar_start,
+          end_at:      bar_start + 60.seconds,
+          price_open:  bar["o"],
+          price_high:  bar["h"],
+          price_low:   bar["l"],
+          price_close: bar["c"],
+          volume:      bar["v"],
+          vwap:        bar["vw"],
+          num_trades:  bar["n"],
+          created_at:  Time.current,
+          updated_at:  Time.current
+        }
+      end
+
+      return 0 if rows.empty?
+
+      TickerMinutePrice.upsert_all(
+        rows,
+        unique_by: %i[ticker_id start_at],
+        update_only: %i[end_at date price_open price_high price_low price_close volume vwap num_trades updated_at]
+      )
+
+      rows.size
+    end
+
+    private
+
+    def client
+      @client ||= AlpacaClient.new
+    end
+  end
+end
