@@ -3,13 +3,13 @@ class CreateOptionDailyPrices < ActiveRecord::Migration[8.1]
     create_table :option_daily_prices do |t|
       t.references :ticker
       t.references :option_contract
-      t.float :price_low
-      t.float :price_high
-      t.float :price_open
-      t.float :price_close
-      t.float :volume
+      t.decimal :price_low,   precision: 19, scale: 4
+      t.decimal :price_high,  precision: 19, scale: 4
+      t.decimal :price_open,  precision: 19, scale: 4
+      t.decimal :price_close, precision: 19, scale: 4
+      t.decimal :volume,      precision: 19, scale: 2
       t.integer :num_trades
-      t.float :vwap
+      t.decimal :vwap,        precision: 19, scale: 4
 
       t.date :date
       t.datetime :start_at

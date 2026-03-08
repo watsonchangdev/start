@@ -1,0 +1,2 @@
+class TradeStockDetail < ApplicationRecord
+end

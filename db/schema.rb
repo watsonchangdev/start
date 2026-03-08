@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_195423) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,12 +103,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
   end
 
   create_table "option_contracts", force: :cascade do |t|
-    t.integer "contract_size"
+    t.integer "contract_size", default: 100
     t.datetime "created_at", null: false
-    t.string "currency"
-    t.date "expires_on"
+    t.string "currency", default: "USD"
+    t.date "expires_on", null: false
     t.string "option_type", null: false
-    t.float "strike_price"
+    t.decimal "strike_price", precision: 19, scale: 4, null: false
     t.string "symbol", null: false
     t.bigint "ticker_id"
     t.datetime "updated_at", null: false
@@ -123,16 +123,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
     t.datetime "end_at"
     t.integer "num_trades"
     t.bigint "option_contract_id"
-    t.float "price_close"
-    t.float "price_high"
-    t.float "price_low"
-    t.float "price_open"
+    t.decimal "price_close", precision: 19, scale: 4
+    t.decimal "price_high", precision: 19, scale: 4
+    t.decimal "price_low", precision: 19, scale: 4
+    t.decimal "price_open", precision: 19, scale: 4
     t.datetime "start_at"
     t.bigint "ticker_id"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
-    t.float "volume"
-    t.float "vwap"
+    t.decimal "volume", precision: 19, scale: 2
+    t.decimal "vwap", precision: 19, scale: 4
     t.index ["option_contract_id", "date"], name: "index_option_daily_prices_on_option_contract_id_and_date", unique: true
     t.index ["option_contract_id"], name: "index_option_daily_prices_on_option_contract_id"
     t.index ["ticker_id"], name: "index_option_daily_prices_on_ticker_id"
@@ -144,16 +144,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
     t.datetime "end_at"
     t.integer "num_trades"
     t.bigint "option_contract_id"
-    t.float "price_close"
-    t.float "price_high"
-    t.float "price_low"
-    t.float "price_open"
+    t.decimal "price_close", precision: 19, scale: 4
+    t.decimal "price_high", precision: 19, scale: 4
+    t.decimal "price_low", precision: 19, scale: 4
+    t.decimal "price_open", precision: 19, scale: 4
     t.datetime "start_at"
     t.bigint "ticker_id"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
-    t.float "volume"
-    t.float "vwap"
+    t.decimal "volume", precision: 19, scale: 2
+    t.decimal "vwap", precision: 19, scale: 4
     t.index ["option_contract_id", "start_at"], name: "index_option_minute_prices_on_option_contract_id_and_start_at", unique: true
     t.index ["option_contract_id"], name: "index_option_minute_prices_on_option_contract_id"
     t.index ["ticker_id"], name: "index_option_minute_prices_on_ticker_id"
@@ -186,16 +186,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
     t.date "date"
     t.datetime "end_at"
     t.integer "num_trades"
-    t.float "price_close"
-    t.float "price_high"
-    t.float "price_low"
-    t.float "price_open"
+    t.decimal "price_close", precision: 19, scale: 4
+    t.decimal "price_high", precision: 19, scale: 4
+    t.decimal "price_low", precision: 19, scale: 4
+    t.decimal "price_open", precision: 19, scale: 4
     t.datetime "start_at"
     t.bigint "ticker_id"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
-    t.float "volume"
-    t.float "vwap"
+    t.decimal "volume", precision: 19, scale: 2
+    t.decimal "vwap", precision: 19, scale: 4
     t.index ["ticker_id", "date"], name: "index_ticker_daily_prices_on_ticker_id_and_date", unique: true
     t.index ["ticker_id"], name: "index_ticker_daily_prices_on_ticker_id"
   end
@@ -205,23 +205,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
     t.date "date"
     t.datetime "end_at"
     t.integer "num_trades"
-    t.float "price_close"
-    t.float "price_high"
-    t.float "price_low"
-    t.float "price_open"
+    t.decimal "price_close", precision: 19, scale: 4
+    t.decimal "price_high", precision: 19, scale: 4
+    t.decimal "price_low", precision: 19, scale: 4
+    t.decimal "price_open", precision: 19, scale: 4
     t.datetime "start_at"
     t.bigint "ticker_id"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
-    t.float "volume"
-    t.float "vwap"
+    t.decimal "volume", precision: 19, scale: 2
+    t.decimal "vwap", precision: 19, scale: 4
     t.index ["ticker_id", "start_at"], name: "index_ticker_minute_prices_on_ticker_id_and_start_at", unique: true
     t.index ["ticker_id"], name: "index_ticker_minute_prices_on_ticker_id"
   end
 
   create_table "tickers", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.string "currency"
+    t.string "currency", default: "USD"
     t.date "listed_on"
     t.string "name"
     t.string "primary_exchange", null: false
@@ -233,11 +233,56 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
     t.index ["symbol"], name: "index_tickers_on_symbol", unique: true
   end
 
+  create_table "trade_option_details", force: :cascade do |t|
+    t.string "action_type", null: false
+    t.datetime "created_at", null: false
+    t.bigint "option_contract_id", null: false
+    t.decimal "premium", precision: 19, scale: 4, null: false
+    t.integer "quantity", null: false
+    t.string "side_type", null: false
+    t.bigint "trade_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["option_contract_id"], name: "index_trade_option_details_on_option_contract_id"
+    t.index ["trade_id"], name: "index_trade_option_details_on_trade_id"
+  end
+
+  create_table "trade_stock_details", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "price", precision: 19, scale: 4, null: false
+    t.decimal "quantity", precision: 19, scale: 8, null: false
+    t.string "side_type", null: false
+    t.bigint "trade_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["trade_id"], name: "index_trade_stock_details_on_trade_id"
+  end
+
+  create_table "trades", force: :cascade do |t|
+    t.string "api_reference_key"
+    t.decimal "commission", precision: 19, scale: 4, default: "0.0"
+    t.datetime "created_at", null: false
+    t.decimal "exchange_fee", precision: 19, scale: 4, default: "0.0"
+    t.datetime "executed_at", null: false
+    t.decimal "net_total", precision: 19, scale: 4, default: "0.0"
+    t.bigint "ticker_id", null: false
+    t.decimal "total_amount", precision: 19, scale: 4, null: false
+    t.string "trade_type", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["api_reference_key"], name: "index_trades_on_api_reference_key", unique: true
+    t.index ["ticker_id"], name: "index_trades_on_ticker_id"
+    t.index ["user_id", "ticker_id"], name: "index_trades_on_user_id_and_ticker_id"
+    t.index ["user_id"], name: "index_trades_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
     t.string "password_digest", null: false
     t.datetime "updated_at", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 

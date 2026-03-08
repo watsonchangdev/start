@@ -8,7 +8,7 @@ class CreateTickers < ActiveRecord::Migration[8.1]
       t.string :website
       t.date :listed_on
       t.string :sic_code
-      t.string :currency
+      t.string :currency, default: 'USD'
 
       t.uuid :uuid, default: "gen_random_uuid()", null: false
       t.timestamps
