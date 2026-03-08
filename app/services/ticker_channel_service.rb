@@ -12,7 +12,8 @@ class TickerChannelService
       channel.user_participants.create!(user: user)
     end
 
-    channel.bot_participants.create!(bot_type: "market_data", username: "MarketBot")
+    channel.bot_participants.create!(bot_type: ChannelBot::BotType::News.serialize, username: "NewsBot")
+    channel.bot_participants.create!(bot_type: ChannelBot::BotType::Notifications.serialize, username: "NotificationsBot")
 
     channel
   end
