@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   resource :session
   resource :registration, only: [ :new, :create ]
-  resources :passwords, param: :token
 
   # Redirect to localhost from 127.0.0.1 to use same IP address with Vite server
   constraints(host: "127.0.0.1") do
@@ -18,6 +17,7 @@ Rails.application.routes.draw do
 
   root "welcome#home"
   mount MissionControl::Jobs::Engine, at: "/jobs"
+  mount RailsEventStore::Browser => "/res" if Rails.env.development?
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   get "up" => "rails/health#show", as: :rails_health_check

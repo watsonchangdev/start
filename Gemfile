@@ -45,6 +45,8 @@ gem "alba"
 gem "sorbet-runtime"
 gem "faraday"
 gem "mission_control-jobs"
+gem "vite_rails", "~> 3.0"
+gem "rails_event_store", "~> 2.18.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -73,5 +75,3 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
-
-gem "vite_rails", "~> 3.0"
