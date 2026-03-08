@@ -10,6 +10,6 @@ class CreateChannelBots < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :channel_bots, [:channel_id, :bot_type], unique: true
+    add_index :channel_bots, [ :channel_id, :bot_type ], unique: true
   end
 end

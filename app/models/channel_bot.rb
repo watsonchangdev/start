@@ -3,5 +3,4 @@ class ChannelBot < ApplicationRecord
   has_many :messages, class_name: "ChannelMessage", as: :sent_by
 
   private
-
 end

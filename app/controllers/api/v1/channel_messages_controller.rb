@@ -1,5 +1,5 @@
 class Api::V1::ChannelMessagesController < Api::V1::BaseController
-  skip_before_action :require_api_authentication, only: [:index]
+  skip_before_action :require_api_authentication, only: [ :index ]
 
   before_action :set_channel
 

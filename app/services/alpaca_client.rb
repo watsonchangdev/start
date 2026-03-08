@@ -29,7 +29,6 @@ class AlpacaClient
     results
   end
 
-
   # Returns basic asset info for a symbol: name, exchange, class, tradable, etc.
   # https://docs.alpaca.markets/reference/getasset
   def asset(symbol)

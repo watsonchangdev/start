@@ -1,5 +1,4 @@
 class Channel < ApplicationRecord
-
   class ChannelType < T::Enum
     enums do
       Ticker   = new("ticker")
@@ -8,7 +7,7 @@ class Channel < ApplicationRecord
     end
   end
 
-  enum :channel_type, ChannelType.values.to_h { |v| [v.serialize.to_sym, v.serialize] }
+  enum :channel_type, ChannelType.values.to_h { |v| [ v.serialize.to_sym, v.serialize ] }
 
   has_many :user_participants, class_name: "ChannelUser"
   has_many :bot_participants, class_name: "ChannelBot"

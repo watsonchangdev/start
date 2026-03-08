@@ -1,9 +1,8 @@
 class StocksService
   class << self
-
     def create_or_get_by_ticker(symbol)
       ticker = Ticker.find_by(symbol: symbol.upcase)
-      
+
       return ticker if ticker.present?
 
       ticker_info = client.asset(symbol)

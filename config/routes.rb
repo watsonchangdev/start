@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   resource :session
-  resource :registration, only: [:new, :create]
+  resource :registration, only: [ :new, :create ]
   resources :passwords, param: :token
 
   # Redirect to localhost from 127.0.0.1 to use same IP address with Vite server
@@ -10,13 +10,13 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :channels, only: [:index, :create], param: :uuid do
-        resources :channel_messages, only: [:index, :create], path: "messages"
+      resources :channels, only: [ :index, :create ], param: :uuid do
+        resources :channel_messages, only: [ :index, :create ], path: "messages"
       end
     end
   end
 
-  root 'welcome#home'
+  root "welcome#home"
   mount MissionControl::Jobs::Engine, at: "/jobs"
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

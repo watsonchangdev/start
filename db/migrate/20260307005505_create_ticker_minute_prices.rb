@@ -18,6 +18,6 @@ class CreateTickerMinutePrices < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :ticker_minute_prices, [:ticker_id, :start_at], unique: true
+    add_index :ticker_minute_prices, [ :ticker_id, :start_at ], unique: true
   end
 end

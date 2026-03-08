@@ -19,6 +19,6 @@ class CreateOptionMinutePrices < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :option_minute_prices, [:option_contract_id, :start_at], unique: true
+    add_index :option_minute_prices, [ :option_contract_id, :start_at ], unique: true
   end
 end

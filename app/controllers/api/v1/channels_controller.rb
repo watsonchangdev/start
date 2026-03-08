@@ -1,5 +1,5 @@
 class Api::V1::ChannelsController < Api::V1::BaseController
-  skip_before_action :require_api_authentication, only: [:index]
+  skip_before_action :require_api_authentication, only: [ :index ]
 
   def index
     channels = Channel.order(:name)
@@ -19,6 +19,6 @@ class Api::V1::ChannelsController < Api::V1::BaseController
   private
 
   def channel_params
-    params.expect(channel: [:name, :channel_type, :description])
+    params.expect(channel: [ :name, :channel_type, :description ])
   end
 end

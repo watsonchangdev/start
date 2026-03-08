@@ -3,5 +3,4 @@ class ChannelUser < ApplicationRecord
   belongs_to :user
 
   private
-
 end
