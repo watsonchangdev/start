@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,31 +30,26 @@ function formatTime(iso: string) {
 
 interface MessageBubbleProps {
   message: ChannelMessage;
-  isGrouped: boolean;
 }
 
-function MessageBubble({ message, isGrouped }: MessageBubbleProps) {
+function MessageBubble({ message }: MessageBubbleProps) {
   return (
-    <div className={cn("flex gap-3 px-1", isGrouped ? "mt-0.5" : "mt-4")}>
+    <div className="flex gap-3 px-1 mt-4">
       <div className="w-9 shrink-0 pt-0.5">
-        {!isGrouped && (
-          <Avatar className="h-9 w-9">
-            <AvatarFallback className="text-xs font-medium bg-zinc-200 text-zinc-700">
-              {initials(message.username)}
-            </AvatarFallback>
-          </Avatar>
-        )}
+        <Avatar className="h-9 w-9">
+          <AvatarFallback className="text-xs font-medium bg-zinc-200 text-zinc-700">
+            {initials(message.username)}
+          </AvatarFallback>
+        </Avatar>
       </div>
 
       <div className="flex-1 min-w-0">
-        {!isGrouped && (
-          <div className="flex items-baseline gap-2 mb-0.5">
-            <span className="text-sm font-semibold leading-none text-foreground">
-              {message.username}
-            </span>
-            <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
-          </div>
-        )}
+        <div className="flex items-baseline gap-2 mb-0.5">
+          <span className="text-sm font-semibold leading-none text-foreground">
+            {message.username}
+          </span>
+          <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
+        </div>
         <p className="text-sm text-foreground leading-relaxed">{message.content}</p>
       </div>
     </div>
@@ -127,9 +122,9 @@ export function ShowChannel({ channel }: ShowChannelProps) {
   }
 
   return (
-    <>
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Messages */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="px-4 pb-4">
           <div className="pt-8 pb-4 mb-2 border-b">
             <div className="flex items-center gap-2 mb-1">
@@ -156,10 +151,9 @@ export function ShowChannel({ channel }: ShowChannelProps) {
             </div>
           )}
 
-          {messages.map((msg, i) => {
-            const isGrouped = i > 0 && messages[i - 1].username === msg.username;
-            return <MessageBubble key={msg.uuid} message={msg} isGrouped={isGrouped} />;
-          })}
+          {messages.map((msg) => (
+            <MessageBubble key={msg.uuid} message={msg} />
+          ))}
 
           <div ref={bottomRef} />
         </div>
@@ -195,6 +189,6 @@ export function ShowChannel({ channel }: ShowChannelProps) {
           Press <kbd className="px-1 py-0.5 bg-muted rounded text-[11px] font-mono">Enter</kbd> to send
         </p>
       </div>
-    </>
+    </div>
   );
 }

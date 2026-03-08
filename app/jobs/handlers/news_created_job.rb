@@ -14,9 +14,14 @@ module Handlers
 
         channel.messages.create!(
           sent_by:      news_bot,
-          message_type: ChannelMessage::MessageType::Notification.serialize,
+          message_type: ChannelMessage::MessageType::MediaLink.serialize,
           content:      news.headline,
-          metadata:     { news_uuid: news.uuid }
+          metadata:     {
+            news_uuid:     news.uuid,
+            source_url:    news.article_url,
+            thumbnail_url: news.thumb_url,
+            ticker_price:  ticker.get_price_as_of(news.published_at)
+          }
         )
       end
     end

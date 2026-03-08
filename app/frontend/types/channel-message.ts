@@ -1,4 +1,4 @@
-export type MessageType = "user_message" | "data_table" | "notification"
+export type MessageType = "user_message" | "data_table" | "notification" | "media_link"
 
 export interface ChannelMessage {
   uuid: string

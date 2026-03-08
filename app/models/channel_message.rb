@@ -4,6 +4,7 @@ class ChannelMessage < ApplicationRecord
       UserMessage  = new("user_message")
       DataTable    = new("data_table")
       Notification = new("notification")
+      MediaLink    = new("media_link")
     end
   end
 
