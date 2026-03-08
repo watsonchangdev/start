@@ -5,7 +5,7 @@ class ChannelMessageResource
 
   attribute :username do |message|
     sender = message.sent_by
-    sender.is_a?(User) ? sender.email_address : sender.username
+    sender.username || "Anonymous"
   end
 
   attribute :created_at do |message|

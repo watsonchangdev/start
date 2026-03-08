@@ -5,10 +5,10 @@ class StocksService
 
       return ticker if ticker.present?
 
-      ticker_info = client.asset(symbol)
+      ticker_info = client.asset(symbol.upcase)
 
       ticker = Ticker.create!(
-        symbol: symbol,
+        symbol: symbol.upcase,
         name: ticker_info["name"],
         primary_exchange: ticker_info["exchange"]
       )

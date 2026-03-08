@@ -9,12 +9,17 @@ export class ApiError extends Error {
   }
 }
 
+function csrfToken(): string {
+  return (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? ""
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api/v1${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      "X-CSRF-Token": csrfToken(),
       ...init?.headers,
     },
   })
