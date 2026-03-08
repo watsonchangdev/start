@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,52 +7,7 @@ import { AlertCircle, Hash, Loader2, Send } from "lucide-react";
 import { channelMessageMutations, channelMessageQueries } from "@/queries/channel-message-queries";
 import { keys } from "@/lib/query-keys";
 import type { Channel } from "@/types/channel";
-import type { ChannelMessage } from "@/types/channel-message";
-
-// --- Helpers ---
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-}
-
-// --- Message Bubble ---
-
-interface MessageBubbleProps {
-  message: ChannelMessage;
-}
-
-function MessageBubble({ message }: MessageBubbleProps) {
-  return (
-    <div className="flex gap-3 px-1 mt-4">
-      <div className="w-9 shrink-0 pt-0.5">
-        <Avatar className="h-9 w-9">
-          <AvatarFallback className="text-xs font-medium bg-zinc-200 text-zinc-700">
-            {initials(message.username)}
-          </AvatarFallback>
-        </Avatar>
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2 mb-0.5">
-          <span className="text-sm font-semibold leading-none text-foreground">
-            {message.username}
-          </span>
-          <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
-        </div>
-        <p className="text-sm text-foreground leading-relaxed">{message.content}</p>
-      </div>
-    </div>
-  );
-}
+import { ChannelMessageBubble } from "@/components/chat/ChannelMessageBubble";
 
 // --- Messages Skeleton ---
 
@@ -152,7 +105,7 @@ export function ShowChannel({ channel }: ShowChannelProps) {
           )}
 
           {messages.map((msg) => (
-            <MessageBubble key={msg.uuid} message={msg} />
+            <ChannelMessageBubble key={msg.uuid} message={msg} />
           ))}
 
           <div ref={bottomRef} />
