@@ -87,7 +87,7 @@ app/frontend/
 
 **Component library:**
 - shadcn/ui with base-lyra style preset
-- Icons: Lucide React + Phosphor Icons
+- Icons: Lucide React
 - Tailwind CSS v4 with CSS variables for theming
 
 ## Conventions
@@ -96,3 +96,4 @@ app/frontend/
 - **ALWAYS** optimize for best practices and high quality and readable code.
 - Use OpenAPI standards for API endpoints.
 - Use Sorbet for type signatures.
+- Use event driven architecture. Event pubsub uses the "Rails Event Store" library.

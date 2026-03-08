@@ -4,6 +4,7 @@
 * rails 8
 * inertia.js
 * postgresql
+* rails-event-store
 
 ### local dev
 

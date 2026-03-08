@@ -31,8 +31,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_163537) do
     t.datetime "created_at", null: false
     t.string "message_type", null: false
     t.jsonb "metadata", default: {}
-    t.bigint "sent_by_id", null: false
-    t.string "sent_by_type", null: false
+    t.bigint "sent_by_id"
+    t.string "sent_by_type"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["channel_id"], name: "index_channel_messages_on_channel_id"
