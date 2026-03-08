@@ -4,7 +4,7 @@ class TickerChannelService
 
     channel = Channel.create!(
       name:         ticker.symbol,
-      channel_type: Channel::ChannelType::Ticker.serialize,
+      channel_type: Enums::Channels::ChannelType::Ticker.serialize,
       description:  "#{ticker.name} (#{ticker.symbol})"
     )
 
@@ -12,8 +12,8 @@ class TickerChannelService
       channel.user_participants.create!(user: user)
     end
 
-    channel.bot_participants.create!(bot_type: ChannelBot::BotType::News.serialize, username: "NewsBot")
-    channel.bot_participants.create!(bot_type: ChannelBot::BotType::Notifications.serialize, username: "NotificationsBot")
+    channel.bot_participants.create!(bot_type: Enums::Channels::BotType::News.serialize, username: "NewsBot")
+    channel.bot_participants.create!(bot_type: Enums::Channels::BotType::Notifications.serialize, username: "NotificationsBot")
 
     channel
   end

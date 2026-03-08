@@ -7,7 +7,7 @@ class Api::V1::ChannelsController < Api::V1::BaseController
   end
 
   def create
-    if channel_params[:channel_type] == Channel::ChannelType::Ticker.serialize
+    if channel_params[:channel_type] == Enums::Channels::ChannelType::Ticker.serialize
       user_ids = params[:channel][:participant_user_ids].presence || [ current_user.id ]
       users = User.where(id: user_ids)
       channel = TickerChannelService.new.create_new_channel(channel_params[:name], participant_users: users)

@@ -1,17 +1,9 @@
 class Channel < ApplicationRecord
-  class ChannelType < T::Enum
-    enums do
-      Ticker   = new("ticker")
-      Chat     = new("chat")
-      Feature  = new("feature")
-    end
-  end
-
-  enum :channel_type, ChannelType.values.to_h { |v| [ v.serialize.to_sym, v.serialize ] }
+  enum :channel_type, Enums::Channels::ChannelType.values.to_h { |v| [ v.serialize.to_sym, v.serialize ] }
 
   has_many :user_participants, class_name: "ChannelUser"
-  has_many :bot_participants, class_name: "ChannelBot"
-  has_many :messages, class_name: "ChannelMessage"
+  has_many :bot_participants,  class_name: "ChannelBot"
+  has_many :messages,          class_name: "ChannelMessage"
 
   normalizes :name, with: ->(n) { n.strip }
 
@@ -23,6 +15,6 @@ class Channel < ApplicationRecord
   private
 
   def normalize_channel_name
-    self.name = name.upcase if channel_type == ChannelType::Ticker.serialize
+    self.name = name.upcase if channel_type == Enums::Channels::ChannelType::Ticker.serialize
   end
 end
