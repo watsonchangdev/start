@@ -30,7 +30,7 @@ module OptionPositions
   class OptionStrategyPosition < T::Struct
     const :symbol,                  String
     const :spot_price,              BigDecimal  # current stock price at time of valuation
-    const :legs,                    T::Array[OptionLeg]
+    const :legs,                    T::Hash[Date, T::Array[OptionLeg]]
     const :net_realized_pnl,        BigDecimal              # locked in from fully closed legs
     const :net_unrealized_pnl,      BigDecimal              # sum of open leg unrealized P&Ls
     const :net_delta,               T.nilable(BigDecimal)   # sum of leg deltas

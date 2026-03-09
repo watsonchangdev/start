@@ -22,6 +22,14 @@ function formatPnl(value: number) {
   return { formatted, positive: value >= 0 };
 }
 
+function daysUntil(isoDate: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const exp = new Date(isoDate);
+  exp.setHours(0, 0, 0, 0);
+  return Math.round((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 // --- Message body variants ---
 
 function UserMessageBody({ content }: { content: string }) {
@@ -81,34 +89,44 @@ function OptionPositionCard({ position }: { position: OptionStrategyPosition }) 
             <th className="text-center font-medium px-2 py-1.5">Side</th>
             <th className="text-right font-medium px-2 py-1.5">Qty</th>
             <th className="text-right font-medium px-2 py-1.5">Strike</th>
-            <th className="text-right font-medium px-2 py-1.5">Exp</th>
             <th className="text-right font-medium px-2 py-1.5">Trade</th>
             <th className="text-right font-medium px-2 py-1.5">Mark</th>
             <th className="text-right font-medium px-3 py-1.5">P&L</th>
           </tr>
         </thead>
         <tbody>
-          {position.legs.map((leg) => {
-            const legPnl = formatPnl(leg.unrealized_pnl + leg.realized_pnl);
-            return (
-              <tr key={leg.occ_symbol} className="border-b last:border-0">
-                <td className="px-3 py-1.5 font-mono text-[11px]">{leg.occ_symbol}</td>
-                <td className="px-2 py-1.5 text-center">
-                  <span className={`capitalize ${leg.side === "long" ? "text-blue-600" : "text-orange-500"}`}>
-                    {leg.side}
+          {Object.entries(position.legs).map(([expDate, legs]) => (
+            <>
+              <tr key={expDate} className="border-b bg-muted/30">
+                <td colSpan={7} className="px-3 py-1 text-[11px] font-medium text-muted-foreground">
+                  Exp {expDate}
+                  <span className="ml-1.5 text-muted-foreground/60">
+                    {(() => { const d = daysUntil(expDate); return d === 0 ? "(expires today)" : d < 0 ? `(expired ${Math.abs(d)}d ago)` : `(${d}d)` })()}
                   </span>
                 </td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{leg.quantity}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.strike_price)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{leg.expiration_date}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.trade_price)}</td>
-                <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.mark_price)}</td>
-                <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${legPnl.positive ? "text-green-600" : "text-red-500"}`}>
-                  {legPnl.formatted}
-                </td>
               </tr>
-            );
-          })}
+              {legs.map((leg) => {
+                const legPnl = formatPnl(leg.unrealized_pnl + leg.realized_pnl);
+                return (
+                  <tr key={leg.occ_symbol} className="border-b last:border-0">
+                    <td className="px-3 py-1.5 font-mono text-[11px]">{leg.occ_symbol}</td>
+                    <td className="px-2 py-1.5 text-center">
+                      <span className={`capitalize ${leg.side === "long" ? "text-blue-600" : "text-orange-500"}`}>
+                        {leg.side}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{leg.quantity}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.strike_price)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.trade_price)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.mark_price)}</td>
+                    <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${legPnl.positive ? "text-green-600" : "text-red-500"}`}>
+                      {legPnl.formatted}
+                    </td>
+                  </tr>
+                );
+              })}
+            </>
+          ))}
         </tbody>
       </table>
     </div>

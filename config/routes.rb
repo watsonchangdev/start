@@ -13,6 +13,10 @@ Rails.application.routes.draw do
         resources :channel_messages, only: [ :index, :create ], path: "messages"
         post :option_positions, on: :member
       end
+
+      namespace :positions do
+        get :options
+      end
     end
   end
 

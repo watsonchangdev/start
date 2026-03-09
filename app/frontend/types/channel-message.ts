@@ -21,7 +21,6 @@ export interface OptionLeg {
   side: "long" | "short"
   quantity: number
   strike_price: number
-  expiration_date: string
   trade_price: number
   mark_price: number
   realized_pnl: number
@@ -38,7 +37,7 @@ export interface OptionStrategyPosition {
   net_delta: number | null
   net_theta: number | null
   net_vega: number | null
-  legs: OptionLeg[]
+  legs: Record<string, OptionLeg[]>  // key: ISO expiration date
 }
 
 export interface DataTableMetadata {

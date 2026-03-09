@@ -29,7 +29,7 @@ class Api::V1::ChannelsController < Api::V1::BaseController
       .where(trade_type: "option")
       .includes(option_legs: { option_contract: [ :minute_prices, :daily_prices ] }, ticker: [])
 
-    positions = trades.map { |t| OptionsPositionService.get_realtime_option_position(t) }
+    positions = OptionsPositionService.get_realtime_option_positions(trades)
     positions = positions.select { |p| p.status == Enums::Trades::PositionStatus::Open } if filter_open_only?
 
     position_data = JSON.parse(OptionPositionResource.new(positions).serialize)
