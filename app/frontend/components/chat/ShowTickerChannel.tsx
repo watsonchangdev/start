@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AlertCircle, BarChart2, Loader2, Send } from "lucide-react";
+import { AlertCircle, BarChart2, Loader2, Send, TrendingDown, TrendingUp, Activity } from "lucide-react";
 import { channelMessageMutations, channelMessageQueries } from "@/queries/channel-message-queries";
 import { keys } from "@/lib/query-keys";
 import type { Channel } from "@/types/channel";
@@ -68,18 +68,42 @@ export function ShowTickerChannel({ channel }: { channel: Channel }) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      <div className="shrink-0 px-4 pt-8 pb-4 border-b bg-background">
+        <div className="flex items-center gap-2 mb-1">
+          <BarChart2 className="h-6 w-6" />
+          <h2 className="text-xl font-bold">{channel.name}</h2>
+        </div>
+        <div className="flex items-stretch gap-2 mt-3">
+          <div className="flex-1 rounded-lg border bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] text-muted-foreground mb-1">Price</p>
+            <p className="text-base font-semibold tabular-nums">$213.49</p>
+          </div>
+          <div className="flex-1 rounded-lg border bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] text-muted-foreground mb-1">Today</p>
+            <div className="flex items-center gap-1">
+              <TrendingUp className="h-4 w-4 text-green-600 shrink-0" />
+              <p className="text-base font-semibold tabular-nums text-green-600">+$3.21</p>
+            </div>
+            <p className="text-[11px] text-green-600 tabular-nums">+1.53%</p>
+          </div>
+          <div className="flex-1 rounded-lg border bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] text-muted-foreground mb-1">Volume</p>
+            <div className="flex items-center gap-1">
+              <Activity className="h-4 w-4 text-orange-500 shrink-0" />
+              <p className="text-base font-semibold tabular-nums">84.2M</p>
+            </div>
+            <p className="text-[11px] text-orange-500">irregular</p>
+          </div>
+          <div className="flex-1 rounded-lg border bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] text-muted-foreground mb-1">My P&L</p>
+            <p className="text-base font-semibold tabular-nums text-green-600">+$1,240.00</p>
+            <p className="text-[11px] text-muted-foreground tabular-nums">Day <span className="text-green-600 font-medium">+$318.50</span></p>
+          </div>
+        </div>
+      </div>
+
       <ScrollArea className="flex-1 min-h-0">
         <div className="px-4 pb-4">
-          <div className="pt-8 pb-4 mb-2 border-b">
-            <div className="flex items-center gap-2 mb-1">
-              <BarChart2 className="h-6 w-6" />
-              <h2 className="text-xl font-bold">{channel.name}</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Market activity and news for <strong>{channel.name}</strong>.
-            </p>
-          </div>
-
           {messagesPending && <MessagesSkeleton />}
 
           {messagesError && (
