@@ -1,7 +1,7 @@
 class SyncNewsJob < ApplicationJob
   queue_as :default
 
-  SYNC_JOB_TIME_RANGE = 3.days
+  SYNC_JOB_TIME_RANGE = 2.hours
 
   def perform
     symbols = Ticker.pluck(:symbol)

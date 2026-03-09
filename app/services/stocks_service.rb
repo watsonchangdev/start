@@ -28,28 +28,20 @@ class StocksService
         feed:       "iex"
       )
 
-      rows = bars.map do |bar|
+      return false if bars.empty?
+
+      bars.each do |bar|
         timestamp = Time.parse(bar["t"])
-        {
-          ticker_id:   ticker.id,
-          date:        timestamp.to_date,
-          start_at:    timestamp.beginning_of_day,
-          end_at:      timestamp.end_of_day,
-          price_open:  bar["o"],
-          price_high:  bar["h"],
-          price_low:   bar["l"],
-          price_close: bar["c"],
-          volume:      bar["v"],
-          vwap:        bar["vw"],
-          num_trades:  bar["n"],
-          created_at:  Time.current,
-          updated_at:  Time.current
-        }
+        TickerDailyPrice.find_or_create_by!(ticker: ticker, date: timestamp.to_date) do |r|
+          r.price_open  = bar["o"]
+          r.price_high  = bar["h"]
+          r.price_low   = bar["l"]
+          r.price_close = bar["c"]
+          r.volume      = bar["v"]
+          r.vwap        = bar["vw"]
+          r.num_trades  = bar["n"]
+        end
       end
-
-      return 0 if rows.empty?
-
-      TickerDailyPrice.insert_all(rows, unique_by: %i[ticker_id date])
 
       true
     end
