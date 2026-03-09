@@ -1,7 +1,7 @@
 class SyncMinutePricesJob < ApplicationJob
   queue_as :default
 
-  REALTIME_TIME_RANGE = 15.minutes
+  REALTIME_TIME_RANGE = 60.minutes
 
   def perform
     end_at   = Time.current.beginning_of_minute
