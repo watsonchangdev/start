@@ -7,20 +7,17 @@ class Api::V1::ChannelsController < Api::V1::BaseController
   end
 
   def create
-    if channel_params[:channel_type] == Enums::Channels::ChannelType::Ticker.serialize
-      user_ids = params[:channel][:participant_user_ids].presence || [ current_user.id ]
-      users = User.where(id: user_ids)
-      channel = TickerChannelService.new.create_new_channel(channel_params[:name], participant_users: users)
+    user_ids = params[:channel][:participant_user_ids].presence || [ current_user.id ]
+    users = User.where(id: user_ids)
 
-      render json: ChannelResource.new(channel).serialize, status: :created
-    else
-      channel = Channel.new(channel_params)
-      if channel.save
-        render json: ChannelResource.new(channel).serialize, status: :created
-      else
-        render json: { errors: channel.errors.transform_values(&:first) }, status: :unprocessable_entity
-      end
+    case channel_params[:channel_type]
+    when Enums::Channels::ChannelType::Ticker.serialize
+      channel = ChannelService.create_ticker_channel(channel_params[:name], participant_users: users)
+    when Enums::Channels::ChannelType::Feature.serialize
+      channel = ChannelService.create_feature_channel(channel_params[:name], participant_users: users)
     end
+
+    render json: ChannelResource.new(channel).serialize, status: :created
   rescue ActiveRecord::RecordInvalid => e
     render json: { errors: e.record.errors.transform_values(&:first) }, status: :unprocessable_entity
   rescue AlpacaClient::Error => e
