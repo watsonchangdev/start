@@ -19,7 +19,7 @@ class StocksService
     # Fetches and upserts daily OHLCV bars for a ticker between start_date and end_date.
     # Returns the number of records upserted.
     def get_daily_prices(ticker, start_date, end_date)
-      bars = client.bars(
+      bars = client.stock_bars(
         ticker.symbol,
         timeframe:  "1Day",
         start:      start_date.iso8601,
@@ -49,7 +49,7 @@ class StocksService
     # Fetches and upserts minute OHLCV bars for a ticker between start_at and end_at.
     # Returns the number of records upserted.
     def get_minute_prices(ticker, start_at, end_at)
-      bars = client.bars(
+      bars = client.stock_bars(
         ticker.symbol,
         timeframe:  "1Min",
         start:      start_at.iso8601,

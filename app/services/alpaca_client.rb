@@ -35,10 +35,29 @@ class AlpacaClient
     trading_get("/v2/assets/#{URI.encode_uri_component(symbol)}")
   end
 
+  # Returns OHLCV bars for an option contract.
+  # Automatically follows pagination via next_page_token.
+  # params: timeframe:, start:, end:, limit:
+  # https://docs.alpaca.markets/reference/optionbars
+  def option_bars(occ_symbol, **params)
+    results = []
+    page_token = nil
+
+    loop do
+      body = data_get("/v1beta1/options/bars/#{URI.encode_uri_component(occ_symbol)}", **params, limit: params.fetch(:limit, 1000), page_token:)
+      results.concat(body.fetch("bars", []))
+
+      page_token = body["next_page_token"]
+      break if page_token.nil?
+    end
+
+    results
+  end
+
   # Returns an array of bar hashes for the given symbol.
   # Automatically follows pagination via next_page_token.
   # params: timeframe:, start:, end:, limit:, feed:, adjustment:
-  def bars(symbol, **params)
+  def stock_bars(symbol, **params)
     results = []
     page_token = nil
 
