@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_08_195423) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_09_175705) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -159,6 +159,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_195423) do
     t.index ["ticker_id"], name: "index_option_minute_prices_on_ticker_id"
   end
 
+  create_table "option_positions", force: :cascade do |t|
+    t.decimal "average_cost_basis", precision: 19, scale: 4, null: false
+    t.datetime "created_at", null: false
+    t.bigint "option_contract_id", null: false
+    t.integer "quantity", null: false
+    t.decimal "realized_pnl", precision: 19, scale: 4, default: "0.0", null: false
+    t.string "side", null: false
+    t.string "status", default: "open", null: false
+    t.bigint "ticker_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["option_contract_id"], name: "index_option_positions_on_option_contract_id"
+    t.index ["ticker_id"], name: "index_option_positions_on_ticker_id"
+    t.index ["user_id", "option_contract_id"], name: "index_option_positions_on_user_id_and_option_contract_id", unique: true
+    t.index ["user_id"], name: "index_option_positions_on_user_id"
+    t.index ["uuid"], name: "index_option_positions_on_uuid", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -166,6 +185,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_195423) do
     t.string "user_agent"
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "stock_positions", force: :cascade do |t|
+    t.decimal "average_cost_basis", precision: 19, scale: 4, null: false
+    t.datetime "created_at", null: false
+    t.decimal "quantity", precision: 19, scale: 8, null: false
+    t.decimal "realized_pnl", precision: 19, scale: 4, default: "0.0", null: false
+    t.string "status", default: "open", null: false
+    t.bigint "ticker_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["ticker_id"], name: "index_stock_positions_on_ticker_id"
+    t.index ["user_id", "ticker_id"], name: "index_stock_positions_on_user_id_and_ticker_id", unique: true
+    t.index ["user_id"], name: "index_stock_positions_on_user_id"
+    t.index ["uuid"], name: "index_stock_positions_on_uuid", unique: true
   end
 
   create_table "tags", force: :cascade do |t|

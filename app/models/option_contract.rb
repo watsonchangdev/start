@@ -1,7 +1,7 @@
 class OptionContract < ApplicationRecord
   belongs_to :ticker
-  has_many :daily_prices, class_name: "OptionDailyPrice"
-  has_many :minute_prices, class_name: "OptionMinutePrice"
+  has_many :daily_prices,    class_name: "OptionDailyPrice"
+  has_many :minute_prices,   class_name: "OptionMinutePrice"
 
   enum :option_type, Enums::Trades::OptionType.values.to_h { |v| [ v.serialize.to_sym, v.serialize ] }
 
