@@ -1,2 +1,2 @@
-module OptionPositions
+module StockPositions
 end
