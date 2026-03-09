@@ -75,9 +75,11 @@ export function ShowFeatureChannel({ channel }: { channel: Channel }) {
               <Sparkles className="h-6 w-6" />
               <h2 className="text-xl font-bold">{channel.name}</h2>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Feature updates and announcements for <strong>{channel.name}</strong>.
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <Button variant="outline" size="sm" disabled={sending} onClick={() => sendMessage({ content: "show option positions" })}>Show Positions</Button>
+              <Button variant="outline" size="sm">Feature 2</Button>
+              <Button variant="outline" size="sm">Feature 3</Button>
+            </div>
           </div>
 
           {messagesPending && <MessagesSkeleton />}

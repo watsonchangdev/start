@@ -20,5 +20,26 @@ module Enums
         Close = new("close")
       end
     end
+
+    class OptionType < T::Enum
+      enums do
+        Call = new("call")
+        Put  = new("put")
+      end
+    end
+
+    class LegSide < T::Enum
+      enums do
+        Long  = new("long")
+        Short = new("short")
+      end
+    end
+
+    class PositionStatus < T::Enum
+      enums do
+        Open   = new("open")
+        Closed = new("closed")
+      end
+    end
   end
 end

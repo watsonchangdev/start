@@ -20,8 +20,6 @@ class Api::V1::ChannelsController < Api::V1::BaseController
     render json: ChannelResource.new(channel).serialize, status: :created
   rescue ActiveRecord::RecordInvalid => e
     render json: { errors: e.record.errors.transform_values(&:first) }, status: :unprocessable_entity
-  rescue AlpacaClient::Error => e
-    render json: { errors: { ticker: e.message } }, status: :unprocessable_entity
   end
 
   private

@@ -34,8 +34,6 @@ puts "    Tickers: #{[ aapl, nvda ].map(&:symbol).join(', ')}"
 # Channels (via TickerChannelService)
 # ============================================================
 
-service = ChannelService.new
-
 [ aapl, nvda ].each do |ticker|
   next if Channel.exists?(name: ticker.symbol)
 
@@ -43,7 +41,7 @@ service = ChannelService.new
   allow_existing = ->(sym, **) { Ticker.find_by!(symbol: sym.upcase) }
   StocksService.define_singleton_method(:create_or_get_by_ticker, allow_existing)
 
-  service.create_ticker_channel(ticker.symbol, participant_users: [ user ])
+  ChannelService.create_ticker_channel(ticker.symbol, participant_users: [ user ])
   puts "    Channel: ##{ticker.symbol}"
 end
 
