@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ExternalLink } from "lucide-react";
-import type { ChannelMessage, MediaLinkMetadata } from "@/types/channel-message";
+import type { ChannelMessage, DataTableMetadata, MediaLinkMetadata, OptionStrategyPosition } from "@/types/channel-message";
 
 // --- Helpers ---
 
@@ -15,6 +15,11 @@ function formatTime(iso: string) {
 function formatPrice(price: number | null) {
   if (price == null) return null;
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price);
+}
+
+function formatPnl(value: number) {
+  const formatted = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", signDisplay: "always" }).format(value);
+  return { formatted, positive: value >= 0 };
 }
 
 // --- Message body variants ---
@@ -53,6 +58,79 @@ function NotificationBody({ content }: { content: string }) {
   );
 }
 
+function OptionPositionCard({ position }: { position: OptionStrategyPosition }) {
+  const netPnl = position.net_realized_pnl + position.net_unrealized_pnl;
+  const pnl = formatPnl(netPnl);
+
+  return (
+    <div className="rounded-lg border bg-muted/20 overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold">{position.symbol}</span>
+          <span className="text-xs text-muted-foreground">@ {formatPrice(position.spot_price)}</span>
+        </div>
+        <span className={`text-xs font-medium tabular-nums ${pnl.positive ? "text-green-600" : "text-red-500"}`}>
+          {pnl.formatted}
+        </span>
+      </div>
+
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-muted-foreground border-b">
+            <th className="text-left font-medium px-3 py-1.5">Contract</th>
+            <th className="text-center font-medium px-2 py-1.5">Side</th>
+            <th className="text-right font-medium px-2 py-1.5">Qty</th>
+            <th className="text-right font-medium px-2 py-1.5">Strike</th>
+            <th className="text-right font-medium px-2 py-1.5">Exp</th>
+            <th className="text-right font-medium px-2 py-1.5">Trade</th>
+            <th className="text-right font-medium px-2 py-1.5">Mark</th>
+            <th className="text-right font-medium px-3 py-1.5">P&L</th>
+          </tr>
+        </thead>
+        <tbody>
+          {position.legs.map((leg) => {
+            const legPnl = formatPnl(leg.unrealized_pnl + leg.realized_pnl);
+            return (
+              <tr key={leg.occ_symbol} className="border-b last:border-0">
+                <td className="px-3 py-1.5 font-mono text-[11px]">{leg.occ_symbol}</td>
+                <td className="px-2 py-1.5 text-center">
+                  <span className={`capitalize ${leg.side === "long" ? "text-blue-600" : "text-orange-500"}`}>
+                    {leg.side}
+                  </span>
+                </td>
+                <td className="px-2 py-1.5 text-right tabular-nums">{leg.quantity}</td>
+                <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.strike_price)}</td>
+                <td className="px-2 py-1.5 text-right tabular-nums">{leg.expiration_date}</td>
+                <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.trade_price)}</td>
+                <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.mark_price)}</td>
+                <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${legPnl.positive ? "text-green-600" : "text-red-500"}`}>
+                  {legPnl.formatted}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function DataTableBody({ metadata }: { metadata: DataTableMetadata }) {
+  const positions = metadata.data;
+
+  if (positions.length === 0) {
+    return <p className="text-sm text-muted-foreground italic">No open positions.</p>;
+  }
+
+  return (
+    <div className="space-y-3 max-w-2xl">
+      {positions.map((position) => (
+        <OptionPositionCard key={position.symbol} position={position} />
+      ))}
+    </div>
+  );
+}
+
 // --- Message Bubble ---
 
 export interface ChannelMessageBubbleProps {
@@ -80,6 +158,8 @@ export function ChannelMessageBubble({ message }: ChannelMessageBubbleProps) {
 
         {message.message_type === "media_link" ? (
           <MediaLinkBody content={message.content} metadata={message.metadata} />
+        ) : message.message_type === "data_table" ? (
+          <DataTableBody metadata={message.metadata} />
         ) : message.message_type === "notification" ? (
           <NotificationBody content={message.content} />
         ) : (

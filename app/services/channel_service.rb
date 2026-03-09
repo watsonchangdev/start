@@ -29,6 +29,8 @@ class ChannelService
         channel.user_participants.create!(user: user)
       end
 
+      channel.bot_participants.create!(bot_type: Enums::Channels::BotType::Analytics.serialize, username: "DataBot")
+
       channel
     end
   end

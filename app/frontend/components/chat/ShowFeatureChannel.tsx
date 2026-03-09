@@ -44,6 +44,13 @@ export function ShowFeatureChannel({ channel }: { channel: Channel }) {
     },
   });
 
+  const { mutate: showPositions, isPending: loadingPositions } = useMutation({
+    ...channelMessageMutations.optionPositions(channel.uuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.channels.messages(channel.uuid) });
+    },
+  });
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, channel.uuid]);
@@ -68,20 +75,20 @@ export function ShowFeatureChannel({ channel }: { channel: Channel }) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      <div className="shrink-0 px-4 pt-8 pb-4 border-b bg-background">
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="h-6 w-6" />
+          <h2 className="text-xl font-bold">{channel.name}</h2>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <Button variant="outline" size="sm" disabled={loadingPositions} onClick={() => showPositions()}>Show Positions</Button>
+          <Button variant="outline" size="sm">Feature 2</Button>
+          <Button variant="outline" size="sm">Feature 3</Button>
+        </div>
+      </div>
+
       <ScrollArea className="flex-1 min-h-0">
         <div className="px-4 pb-4">
-          <div className="pt-8 pb-4 mb-2 border-b">
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="h-6 w-6" />
-              <h2 className="text-xl font-bold">{channel.name}</h2>
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <Button variant="outline" size="sm" disabled={sending} onClick={() => sendMessage({ content: "show option positions" })}>Show Positions</Button>
-              <Button variant="outline" size="sm">Feature 2</Button>
-              <Button variant="outline" size="sm">Feature 3</Button>
-            </div>
-          </div>
-
           {messagesPending && <MessagesSkeleton />}
 
           {messagesError && (

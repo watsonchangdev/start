@@ -19,4 +19,9 @@ export const channelMessageMutations = {
         channel_message: params,
       }),
   }),
+
+  optionPositions: (channelUuid: string) => ({
+    mutationFn: () =>
+      api.post<ChannelMessage>(`/channels/${channelUuid}/option_positions`, {}),
+  }),
 }

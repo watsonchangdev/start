@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :channels, only: [ :index, :create ], param: :uuid do
         resources :channel_messages, only: [ :index, :create ], path: "messages"
+        post :option_positions, on: :member
       end
     end
   end
