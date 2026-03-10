@@ -15,6 +15,6 @@ class CreateOptionPositions < ActiveRecord::Migration[8.1]
     end
 
     add_index :option_positions, :uuid, unique: true
-    add_index :option_positions, [ :user_id, :option_contract_id ], unique: true
+    add_index :option_positions, [ :user_id, :option_contract_id, :side ], unique: true
   end
 end

@@ -173,7 +173,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_175705) do
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["option_contract_id"], name: "index_option_positions_on_option_contract_id"
     t.index ["ticker_id"], name: "index_option_positions_on_ticker_id"
-    t.index ["user_id", "option_contract_id"], name: "index_option_positions_on_user_id_and_option_contract_id", unique: true
+    t.index ["user_id", "option_contract_id", "side"], name: "idx_on_user_id_option_contract_id_side_7d022fb9df", unique: true
     t.index ["user_id"], name: "index_option_positions_on_user_id"
     t.index ["uuid"], name: "index_option_positions_on_uuid", unique: true
   end
