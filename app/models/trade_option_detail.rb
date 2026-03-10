@@ -11,5 +11,11 @@ class TradeOptionDetail < ApplicationRecord
   validates :quantity, numericality: { only_integer: true, greater_than: 0 }
   validates :premium,  numericality: { greater_than: 0 }
 
+  after_create :update_position
+
   private
+
+  def update_position
+    PositionService.update_from_option_trade(self)
+  end
 end

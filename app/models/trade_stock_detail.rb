@@ -7,5 +7,11 @@ class TradeStockDetail < ApplicationRecord
   validates :side_type, inclusion: { in: Enums::Trades::SideType.values.map(&:serialize) }
   validates :quantity, :price, numericality: { greater_than: 0 }
 
+  after_create :update_position
+
   private
+
+  def update_position
+    PositionService.update_from_stock_trade(self)
+  end
 end
