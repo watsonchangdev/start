@@ -19,7 +19,7 @@ class ApplicationController < ActionController::Base
 
   def set_user
     @user ||= if authenticated?
-      { id: Current.user.id, email_address: Current.user.email_address }
+      { id: Current.user.uuid, email_address: Current.user.email_address, username: Current.user.profile.username }
     else
       nil
     end
