@@ -18,7 +18,7 @@ module OptionPositions
     const :quantity,        Integer     # number of contracts (always positive)
     const :strike_price,    BigDecimal
     const :expiration_date, Date
-    const :trade_price,     BigDecimal          # average premium paid/received per share
+    const :premium,     BigDecimal          # average premium paid/received per share
     const :mark_price,      BigDecimal          # current mid-market premium per share
     const :greeks,          T.nilable(OptionGreeks)  # nil when no live quote available
     const :realized_pnl,    BigDecimal  # locked in from fully closed legs

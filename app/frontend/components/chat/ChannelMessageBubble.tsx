@@ -89,7 +89,7 @@ function OptionPositionCard({ position }: { position: OptionStrategyPosition }) 
             <th className="text-center font-medium px-2 py-1.5">Side</th>
             <th className="text-right font-medium px-2 py-1.5">Qty</th>
             <th className="text-right font-medium px-2 py-1.5">Strike</th>
-            <th className="text-right font-medium px-2 py-1.5">Trade</th>
+            <th className="text-right font-medium px-2 py-1.5">Premium</th>
             <th className="text-right font-medium px-2 py-1.5">Mark</th>
             <th className="text-right font-medium px-3 py-1.5">P&L</th>
           </tr>
@@ -117,7 +117,7 @@ function OptionPositionCard({ position }: { position: OptionStrategyPosition }) 
                     </td>
                     <td className="px-2 py-1.5 text-right tabular-nums">{leg.quantity}</td>
                     <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.strike_price)}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.trade_price)}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.premium)}</td>
                     <td className="px-2 py-1.5 text-right tabular-nums">{formatPrice(leg.mark_price)}</td>
                     <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${legPnl.positive ? "text-green-600" : "text-red-500"}`}>
                       {legPnl.formatted}

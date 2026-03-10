@@ -39,7 +39,7 @@ class OptionPositionResource
           side:          leg.side.serialize,
           quantity:      leg.quantity,
           strike_price:  leg.strike_price.to_f,
-          trade_price:   leg.trade_price.to_f,
+          premium:   leg.premium.to_f,
           mark_price:    leg.mark_price.to_f,
           realized_pnl:  leg.realized_pnl.to_f,
           unrealized_pnl: leg.unrealized_pnl.to_f,

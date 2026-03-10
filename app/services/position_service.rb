@@ -112,7 +112,7 @@ class PositionService
         quantity:        position.quantity,
         strike_price:    contract.strike_price,
         expiration_date: contract.expires_on,
-        trade_price:     position.average_cost_basis,
+        premium:     position.average_cost_basis,
         mark_price:      mark,
         greeks:          nil,
         realized_pnl:    position.realized_pnl,

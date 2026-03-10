@@ -21,7 +21,7 @@ export interface OptionLeg {
   side: "long" | "short"
   quantity: number
   strike_price: number
-  trade_price: number
+  premium: number
   mark_price: number
   realized_pnl: number
   unrealized_pnl: number
