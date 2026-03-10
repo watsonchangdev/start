@@ -79,7 +79,7 @@ unless Trade.where(user: user).exists?
   [
     { ticker: aapl, side: "buy",  qty: 50,  price: 178.42, executed_at: 45.days.ago },
     { ticker: aapl, side: "buy",  qty: 25,  price: 182.10, executed_at: 30.days.ago },
-    { ticker: aapl, side: "sell", qty: 30,  price: 191.75, executed_at: 15.days.ago },
+    { ticker: aapl, side: "sell", qty: 30,  price: 191.75, executed_at: 15.days.ago }
   ].each do |t|
     total = (t[:qty] * t[:price]).round(4)
 
