@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
+import type { SharedProps } from "@/types";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,7 @@ export function Sidebar({ channels, activeChannelUuid, isPending, isError, onSel
           <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-[#1a1d21]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white truncate leading-tight">You</p>
+          <p className="text-sm font-medium text-white truncate leading-tight">{usePage<SharedProps>().props.user?.username ?? "—"}</p>
           <p className="text-xs text-zinc-500 truncate leading-tight">Active</p>
         </div>
         <Popover>
