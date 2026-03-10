@@ -46,49 +46,28 @@ puts "    Tickers: #{[ aapl, nvda ].map(&:symbol).join(', ')}"
 end
 
 # ============================================================
-# Daily prices — 6 months via StocksService
-# ============================================================
-
-[ aapl, nvda ].each do |ticker|
-  next if TickerDailyPrice.where(ticker: ticker).exists?
-
-  StocksService.get_daily_prices(ticker, 6.months.ago.to_date, Date.today)
-  count = TickerDailyPrice.where(ticker: ticker).count
-  puts "    Daily prices: #{ticker.symbol} (#{count} bars)"
-end
-
-# ============================================================
 # Option contracts
 # ============================================================
 
-aapl_call = OptionContract.find_or_create_by!(symbol: "AAPL250620C00190000") do |c|
+aapl_call = OptionContract.find_or_create_by!(symbol: "AAPL260316C00215000") do |c|
   c.ticker        = aapl
   c.option_type   = "call"
-  c.strike_price  = 190.00
-  c.expires_on    = Date.new(2025, 6, 20)
+  c.strike_price  = 215.00
+  c.expires_on    = Date.new(2026, 3, 16)
   c.contract_size = 100
   c.currency      = "USD"
 end
 
-aapl_put = OptionContract.find_or_create_by!(symbol: "AAPL250620P00175000") do |c|
+aapl_put = OptionContract.find_or_create_by!(symbol: "AAPL260327P00150000") do |c|
   c.ticker        = aapl
   c.option_type   = "put"
-  c.strike_price  = 175.00
-  c.expires_on    = Date.new(2025, 6, 20)
+  c.strike_price  = 150.00
+  c.expires_on    = Date.new(2026, 3, 27)
   c.contract_size = 100
   c.currency      = "USD"
 end
 
-nvda_call = OptionContract.find_or_create_by!(symbol: "NVDA250620C00900000") do |c|
-  c.ticker        = nvda
-  c.option_type   = "call"
-  c.strike_price  = 900.00
-  c.expires_on    = Date.new(2025, 6, 20)
-  c.contract_size = 100
-  c.currency      = "USD"
-end
-
-puts "    Option contracts: #{[ aapl_call, aapl_put, nvda_call ].map(&:symbol).join(', ')}"
+puts "    Option contracts: #{[ aapl_call, aapl_put ].map(&:symbol).join(', ')}"
 
 # ============================================================
 # Trades — 5 stock, 5 option
@@ -101,8 +80,6 @@ unless Trade.where(user: user).exists?
     { ticker: aapl, side: "buy",  qty: 50,  price: 178.42, executed_at: 45.days.ago },
     { ticker: aapl, side: "buy",  qty: 25,  price: 182.10, executed_at: 30.days.ago },
     { ticker: aapl, side: "sell", qty: 30,  price: 191.75, executed_at: 15.days.ago },
-    { ticker: nvda, side: "buy",  qty: 10,  price: 842.50, executed_at: 40.days.ago },
-    { ticker: nvda, side: "sell", qty: 5,   price: 903.20, executed_at: 10.days.ago }
   ].each do |t|
     total = (t[:qty] * t[:price]).round(4)
 
@@ -127,12 +104,12 @@ unless Trade.where(user: user).exists?
 
   # --- Option trades ---
 
+  # Strategy 1: Long AAPL Strangle — buy OTM call + OTM put, both legs open
+  # Strategy 2: Short AAPL Put — sell to collect premium, open
   [
-    { contract: aapl_call, ticker: aapl, side: "buy",  action: "open",  qty: 2, premium: 3.40, executed_at: 35.days.ago },
-    { contract: aapl_call, ticker: aapl, side: "sell", action: "close", qty: 2, premium: 6.80, executed_at: 12.days.ago },
-    { contract: aapl_put,  ticker: aapl, side: "buy",  action: "open",  qty: 3, premium: 2.15, executed_at: 28.days.ago },
-    { contract: nvda_call, ticker: nvda, side: "buy",  action: "open",  qty: 1, premium: 18.50, executed_at: 20.days.ago },
-    { contract: nvda_call, ticker: nvda, side: "sell", action: "close", qty: 1, premium: 34.20, executed_at: 5.days.ago }
+    { contract: aapl_call, ticker: aapl, side: "buy",  action: "open", qty: 2, premium: 9.80, executed_at: 20.days.ago },
+    { contract: aapl_put,  ticker: aapl, side: "buy",  action: "open", qty: 2, premium: 3.45, executed_at: 20.days.ago },
+    { contract: aapl_put,  ticker: aapl, side: "sell", action: "open", qty: 1, premium: 4.10, executed_at: 20.days.ago }
   ].each do |t|
     total = (t[:premium] * t[:qty] * 100).round(4)
 
@@ -157,7 +134,7 @@ unless Trade.where(user: user).exists?
     )
   end
 
-  puts "    Trades: 5 stock + 5 option"
+  puts "    Trades: 3 stock + 3 option"
 end
 
 puts "==> Done."

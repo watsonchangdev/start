@@ -1,10 +1,32 @@
 class OptionsService
   class << self
+    # Finds or creates an OptionContract by OCC symbol, fetching metadata from Alpaca if needed.
+    # Returns the OptionContract record.
+    def create_or_get_by_occ_symbol(occ_symbol)
+      contract = OptionContract.find_by(symbol: occ_symbol)
+      return contract if contract.present?
+
+      data   = client.option_contract(occ_symbol)
+      ticker = StocksService.create_or_get_by_ticker(data["underlying_symbol"])
+
+      OptionContract.create!(
+        symbol:        data["symbol"],
+        ticker:        ticker,
+        option_type:   data["type"],
+        strike_price:  data["strike_price"],
+        expires_on:    Date.parse(data["expiration_date"]),
+        contract_size: data["multiplier"].to_i,
+        currency:      data.fetch("currency", "USD")
+      )
+    end
+
     # Fetches and upserts minute OHLCV bars for an option contract between start_at and end_at.
     # Returns true on success, false if no bars were returned.
-    def get_minute_prices(option_contract, start_at, end_at)
+    def get_minute_prices(occ_symbol, start_at, end_at)
+      option_contract = create_or_get_by_occ_symbol(occ_symbol)
+
       bars = client.option_bars(
-        option_contract.symbol,
+        occ_symbol,
         timeframe: "1Min",
         start:     start_at.iso8601,
         end:       end_at.iso8601,
@@ -40,9 +62,11 @@ class OptionsService
 
     # Fetches and upserts daily OHLCV bars for an option contract between start_date and end_date.
     # Returns true on success, false if no bars were returned.
-    def get_daily_prices(option_contract, start_date, end_date)
+    def get_daily_prices(occ_symbol, start_date, end_date)
+      option_contract = create_or_get_by_occ_symbol(occ_symbol)
+
       bars = client.option_bars(
-        option_contract.symbol,
+        occ_symbol,
         timeframe: "1Day",
         start:     start_date.iso8601,
         end:       end_date.iso8601
