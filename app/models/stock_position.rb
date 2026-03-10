@@ -7,6 +7,7 @@ class StockPosition < ApplicationRecord
   validates :status, :quantity, :average_cost_basis, presence: true
   validates :quantity, numericality: { greater_than_or_equal_to: 0 }
   validates :average_cost_basis, numericality: { greater_than: 0 }
+  validates :ticker_id, uniqueness: { scope: [ :user_id ] }
 
   def unrealized_pnl
     return BigDecimal("0") unless open?
