@@ -41,7 +41,7 @@ function NoChannelState() {
   );
 }
 
-export default function Home() {
+export default function Home(props) {
   const [activeChannelUuid, setActiveChannelUuid] = useState<string | null>(null);
 
   const { data: channels = [], isPending: channelsPending, isError: channelsError } =
@@ -56,6 +56,8 @@ export default function Home() {
     isError: channelsError,
     onSelectChannel: setActiveChannelUuid,
   };
+
+  console.log(props);
 
   return (
     <TooltipProvider delay={300}>

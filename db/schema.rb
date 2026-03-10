@@ -87,16 +87,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_175705) do
 
   create_table "news", force: :cascade do |t|
     t.string "api_reference_key"
-    t.string "article_url"
     t.string "author"
     t.datetime "created_at", null: false
     t.string "headline"
-    t.string "large_url"
     t.jsonb "metadata", default: {}
     t.datetime "published_at", null: false
     t.string "source"
     t.text "summary"
-    t.string "thumb_url"
     t.datetime "updated_at", null: false
     t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
     t.index ["api_reference_key"], name: "index_news_on_api_reference_key", unique: true
@@ -176,6 +173,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_175705) do
     t.index ["user_id", "option_contract_id", "side"], name: "idx_on_user_id_option_contract_id_side_7d022fb9df", unique: true
     t.index ["user_id"], name: "index_option_positions_on_user_id"
     t.index ["uuid"], name: "index_option_positions_on_uuid", unique: true
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "first_name"
+    t.string "last_name"
+    t.jsonb "metadata", default: {}
+    t.jsonb "preferences", default: {}
+    t.string "timezone"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.string "username", null: false
+    t.uuid "uuid", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["user_id"], name: "index_profiles_on_user_id"
+    t.index ["username"], name: "index_profiles_on_username", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -326,5 +338,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_175705) do
   add_foreign_key "channel_users", "channels"
   add_foreign_key "channel_users", "users"
   add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"
+  add_foreign_key "profiles", "users"
   add_foreign_key "sessions", "users"
 end

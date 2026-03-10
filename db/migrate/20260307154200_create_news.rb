@@ -6,10 +6,6 @@ class CreateNews < ActiveRecord::Migration[8.1]
       t.string :source
       t.text :summary
 
-      t.string :thumb_url
-      t.string :large_url
-      t.string :article_url
-
       t.datetime :published_at, null: false
       t.string :api_reference_key
       t.jsonb :metadata, default: {}

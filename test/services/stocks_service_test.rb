@@ -148,8 +148,6 @@ class StocksServiceTest < ActiveSupport::TestCase
 
     news = News.find_by(article_url: "https://reuters.com/apple-launch")
     assert_equal "Apple Launches New Product", news.headline
-    assert_equal "https://img.example.com/thumb.jpg", news.thumb_url
-    assert_equal "https://img.example.com/large.jpg", news.large_url
 
     ticker = Ticker.find_by(symbol: "AAPL")
     assert_includes ticker.news_sources, news
@@ -183,8 +181,6 @@ class StocksServiceTest < ActiveSupport::TestCase
 
     news = News.find_by(article_url: "https://bloomberg.com/no-image")
     assert news
-    assert_nil news.thumb_url
-    assert_nil news.large_url
   end
 
   private

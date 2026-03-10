@@ -10,7 +10,6 @@ interface BaseChannelMessage {
 export interface MediaLinkMetadata {
   news_uuid: string
   source_url: string
-  thumbnail_url: string
   ticker_price: number | null
 }
 

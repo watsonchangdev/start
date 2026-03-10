@@ -19,7 +19,6 @@ module Handlers
           metadata:     {
             news_uuid:     news.uuid,
             source_url:    news.article_url,
-            thumbnail_url: news.thumb_url,
             ticker_price:  ticker.get_price_as_of(news.published_at)
           }
         )
