@@ -5,6 +5,7 @@ class CreateNews < ActiveRecord::Migration[8.1]
       t.string :author
       t.string :source
       t.text :summary
+      t.string :article_url
 
       t.datetime :published_at, null: false
       t.string :api_reference_key

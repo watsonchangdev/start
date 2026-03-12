@@ -87,6 +87,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_175705) do
 
   create_table "news", force: :cascade do |t|
     t.string "api_reference_key"
+    t.string "article_url"
     t.string "author"
     t.datetime "created_at", null: false
     t.string "headline"
