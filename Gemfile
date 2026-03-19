@@ -45,7 +45,7 @@ gem "alba"
 gem "sorbet-runtime"
 gem "faraday"
 gem "mission_control-jobs"
-gem "vite_rails", "~> 3.0"
+gem "vite_rails", "~> 3.10"
 gem "rails_event_store", "~> 2.18.0"
 
 group :development, :test do
